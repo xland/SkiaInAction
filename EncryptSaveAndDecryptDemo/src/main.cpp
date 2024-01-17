@@ -54,6 +54,8 @@ std::string RndStr(size_t length) {
 }
 
 std::wstring appName = L"HikLink";
+
+
 bool Store(std::string& target)
 {
     CREDENTIAL cred = { 0 };
@@ -64,12 +66,9 @@ bool Store(std::string& target)
     cred.Persist = CRED_PERSIST_LOCAL_MACHINE;
     return CredWrite(&cred, 0) == TRUE;
 }
-
 bool Remove() {
     return CredDelete(appName.data(), CRED_TYPE_GENERIC, 0) == TRUE;
 }
-
-
 std::string Read()
 {
     CREDENTIAL* cred;
