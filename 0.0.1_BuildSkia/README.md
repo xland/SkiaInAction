@@ -16,3 +16,11 @@
 - 异常情况 if python3 error, delete python3
   - to cmd with administrator
   - C:\Users\liuxiaolun\AppData\Local\Microsoft\WindowsApps>del python3.exe
+
+
+
+
+
+使用Skia库时，提示无法解析的外部符号GrGLInterface::checkError，所以Debug编译时，is_debug=false是错的，这个要验证一下
+错的也没关系，你只要用预处理器SK_RELEASE就可以搞定这个问题
+

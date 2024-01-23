@@ -3,34 +3,13 @@
 #include <string>
 #include <format>
 #include <memory>
-
 #include "include/core/SkGraphics.h"
-#include "include/core/SkSurface.h"
-#include "include/core/SkCanvas.h"
-#include "src/base/SkAutoMalloc.h"
-#include "tools/window/WindowContext.h"
+#include "GLContext.h"
+
 
 HWND hwnd;
-sk_sp<SkSurface> surface;
 int w{ 800 }, h{ 600 };
-SkAutoMalloc surfaceMemory;
-
-void initSurface() {
-    surface.reset();
-    size_t bmpSize = sizeof(BITMAPINFOHEADER) + w * h * sizeof(uint32_t);
-    surfaceMemory.reset(bmpSize);
-    BITMAPINFO* bmpInfo = reinterpret_cast<BITMAPINFO*>(surfaceMemory.get());
-    ZeroMemory(bmpInfo, sizeof(BITMAPINFO));
-    bmpInfo->bmiHeader.biSize = sizeof(BITMAPINFOHEADER);
-    bmpInfo->bmiHeader.biWidth = w;
-    bmpInfo->bmiHeader.biHeight = -h; // negative means top-down bitmap. Skia draws top-down.
-    bmpInfo->bmiHeader.biPlanes = 1;
-    bmpInfo->bmiHeader.biBitCount = 32;
-    bmpInfo->bmiHeader.biCompression = BI_RGB;
-    void* pixels = bmpInfo->bmiColors;
-    SkImageInfo info = SkImageInfo::MakeN32Premul(w, h);
-    surface = SkSurfaces::WrapPixels(info, pixels, sizeof(uint32_t) * w);
-}
+GLContext* context;
 
 LRESULT CALLBACK wndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
@@ -47,18 +26,8 @@ LRESULT CALLBACK wndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
     }
     case WM_PAINT: {
         BeginPaint(hWnd, &ps);
-        initSurface();
-        SkCanvas* canvas = surface->getCanvas();
-        SkPaint paint;
-        paint.setColor(SK_ColorRED);
-        paint.setStyle(SkPaint::kFill_Style);
-        canvas->drawRect(SkRect::MakeXYWH(50, 50, 200, 100), paint);
-        BITMAPINFO* bmpInfo = reinterpret_cast<BITMAPINFO*>(surfaceMemory.get());
-        HDC dc = GetDC(hWnd);
-        StretchDIBits(dc, 0, 0, w, h, 0, 0, w, h, bmpInfo->bmiColors, bmpInfo,DIB_RGB_COLORS, SRCCOPY);
-        ReleaseDC(hWnd, dc);
+        
         EndPaint(hWnd, &ps);
-        surfaceMemory.reset(0);
         return true;
     }
     default:
@@ -87,19 +56,18 @@ void initWindow() {
         return;
     }
     hwnd = CreateWindow(clsName.c_str(), nullptr, WS_OVERLAPPEDWINDOW,100, 100, w, h,nullptr, nullptr, hinstance, nullptr);
+    context = new GLContext();
     ShowWindow(hwnd, SW_SHOW);
 }
 
 int APIENTRY wWinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _In_ LPTSTR lpCmdLine, _In_ int nCmdShow)
 {
     SkGraphics::Init();
-    initSurface();
     initWindow();
     MSG msg;
     while (GetMessage(&msg, NULL, 0, 0)) {
         TranslateMessage(&msg);
         DispatchMessage(&msg);
     }
-    surfaceMemory.release();
     return 0;
 }
