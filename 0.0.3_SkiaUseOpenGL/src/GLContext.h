@@ -6,13 +6,17 @@
 #include "include/core/SkSurfaceProps.h"
 #include "include/gpu/GrContextOptions.h"
 #include "include/gpu/gl/GrGLInterface.h"
+#include "include/gpu/GrDirectContext.h"
 
 class GLContext
 {
 public:
-	GLContext();
+	GLContext(HWND hwnd);
 	~GLContext();
     sk_sp<SkSurface> GetSurface();
+
+
+    sk_sp<GrDirectContext> fContext;
 protected:
 private:
 
@@ -21,7 +25,6 @@ private:
 
 
     sk_sp<SkSurface>           fSurface;
-    sk_sp<GrDirectContext> fContext;
     sk_sp<const GrGLInterface> fBackendContext;
 
 

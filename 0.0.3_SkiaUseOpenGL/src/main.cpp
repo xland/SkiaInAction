@@ -4,6 +4,8 @@
 #include <format>
 #include <memory>
 #include "include/core/SkGraphics.h"
+#include "include/core/SkCanvas.h"
+#include "include/gpu/GrDirectContext.h"
 #include "GLContext.h"
 
 
@@ -25,8 +27,16 @@ LRESULT CALLBACK wndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
         return true;
     }
     case WM_PAINT: {
-        BeginPaint(hWnd, &ps);
-        
+        HDC dc = BeginPaint(hWnd, &ps);
+        auto surface = context->GetSurface();
+        auto canvas = surface->getCanvas();
+        SkPaint paint;
+        paint.setColor(SK_ColorRED);
+        paint.setStyle(SkPaint::kFill_Style);
+        canvas->drawRect(SkRect::MakeXYWH(50, 50, 200, 100), paint);
+        context->fContext->flushAndSubmit(surface.get(), GrSyncCpu::kNo);
+        SwapBuffers(dc);
+        ReleaseDC((HWND)hWnd, dc);
         EndPaint(hWnd, &ps);
         return true;
     }
@@ -56,8 +66,9 @@ void initWindow() {
         return;
     }
     hwnd = CreateWindow(clsName.c_str(), nullptr, WS_OVERLAPPEDWINDOW,100, 100, w, h,nullptr, nullptr, hinstance, nullptr);
-    context = new GLContext();
     ShowWindow(hwnd, SW_SHOW);
+    context = new GLContext(hwnd);
+    
 }
 
 int APIENTRY wWinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _In_ LPTSTR lpCmdLine, _In_ int nCmdShow)

@@ -3,15 +3,13 @@
 #include "src/gpu/ganesh/gl/GrGLGpu.h"
 #include "src/utils/win/SkWGL.h"
 #include "include/gpu/gl/GrGLInterface.h"
-#include "include/gpu/GrDirectContext.h"
 #include "include/gpu/ganesh/gl/GrGLBackendSurface.h"
-
 #include "include/gpu/ganesh/gl/GrGLDirectContext.h"
-
 #include "include/gpu/ganesh/SkSurfaceGanesh.h"
 
-GLContext::GLContext()
+GLContext::GLContext(HWND hwnd)
 {
+    fHWND = hwnd;
     fMSAASampleCount = GrNextPow2(fMSAASampleCount);
     initializeContext();
 }
