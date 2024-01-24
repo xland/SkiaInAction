@@ -52,7 +52,8 @@ LRESULT CALLBACK wndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
         SkPaint paint;
         paint.setColor(SK_ColorRED);
         paint.setStyle(SkPaint::kFill_Style);
-        canvas->drawRect(SkRect::MakeXYWH(50, 50, 200, 100), paint);
+        canvas->clear(SK_ColorBLACK);
+        canvas->drawRect(SkRect::MakeLTRB(w-150, h-150, w-10, h-10), paint);
         BITMAPINFO* bmpInfo = reinterpret_cast<BITMAPINFO*>(surfaceMemory.get());
         HDC dc = GetDC(hWnd);
         StretchDIBits(dc, 0, 0, w, h, 0, 0, w, h, bmpInfo->bmiColors, bmpInfo,DIB_RGB_COLORS, SRCCOPY);
