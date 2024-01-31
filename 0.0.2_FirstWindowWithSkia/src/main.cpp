@@ -46,7 +46,7 @@ LRESULT CALLBACK wndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
         return true;
     }
     case WM_PAINT: {
-        BeginPaint(hWnd, &ps);
+        auto dc = BeginPaint(hWnd, &ps);
         initSurface();
         SkCanvas* canvas = surface->getCanvas();
         SkPaint paint;
@@ -55,7 +55,6 @@ LRESULT CALLBACK wndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
         canvas->clear(SK_ColorBLACK);
         canvas->drawRect(SkRect::MakeLTRB(w-150, h-150, w-10, h-10), paint);
         BITMAPINFO* bmpInfo = reinterpret_cast<BITMAPINFO*>(surfaceMemory.get());
-        HDC dc = GetDC(hWnd);
         StretchDIBits(dc, 0, 0, w, h, 0, 0, w, h, bmpInfo->bmiColors, bmpInfo,DIB_RGB_COLORS, SRCCOPY);
         ReleaseDC(hWnd, dc);
         EndPaint(hWnd, &ps);
