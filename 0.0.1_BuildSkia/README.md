@@ -1,9 +1,15 @@
+# 前言
+
+Skia已经成为基础设施
+
+每章内容简介。
+
 # 介绍
 Skia是一个开源的2D图形库，可以用来绘制几乎所有的几何图形、文本和图像。
 
 它抽象了特定于平台的图形API(每个平台的图形API各不相同)，为开发者提供了可以在各种平台上工作的通用2D绘图能力。
 
-它是Chrome、Firefox、ChromeOS、Android、Avalonia、LibreOffice、RAD Studio和许多其他产品的图形引擎。
+它是Chrome、Firefox、ChromeOS、Android、Avalonia、LibreOffice、RAD Studio、Compose Multiplatform等许多产品的图形引擎。
 
 Skia最初由Mike Reed和Cary Clark于2004年创立，2005年被谷歌收购，2008年基于BSD协议开源。
 
