@@ -1,4 +1,4 @@
 set(SRC
     main.cpp
 )
-target_sources(${PROJECT_NAME} PRIVATE ${SRC})
+target_sources(${PROJECT_NAME} PRIVATE ${SRC} "allen.h")

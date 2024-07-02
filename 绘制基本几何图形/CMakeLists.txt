@@ -13,11 +13,10 @@ if(NOT IS_DIRECTORY "${SKIA_LIB_PATH}")
     message(FATAL_ERROR "The path ${SKIA_LIB_PATH} does not exist.")
 endif()
 
-set(CMAKE_CXX_STANDARD 20)
 
-if(MSVC)
-    set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
-endif()
+
+set(CMAKE_CXX_STANDARD 20)
+set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
 
 link_directories("${SKIA_LIB_PATH}")
 include_directories("${SKIA_INCLUDE_PATH}")
