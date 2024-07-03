@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.18)
-set(PROJECT_NAME "FirstDraw")
+set(PROJECT_NAME "DrawInImage")
 project(${PROJECT_NAME})
 
 set(SKIA_INCLUDE_PATH "D:\\sdk\\skia" CACHE PATH "Skia include path,default:D:/sdk/skia" FORCE)
