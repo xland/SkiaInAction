@@ -3,6 +3,7 @@
 #include "include/core/SkSurface.h"
 #include "include/core/SkCanvas.h"
 #include "src/base/SkAutoMalloc.h"
+#include "include/core/SkRRect.h"
 
 
 int w{ 800 }, h{ 600 };
@@ -18,12 +19,64 @@ void drawCircle(SkCanvas* canvas) {
     canvas->drawCircle(x, y, r, paint);
 }
 
+void drawEllipse(SkCanvas* canvas) {
+    SkPaint paint;
+    paint.setColor(SK_ColorRED);
+    paint.setAntiAlias(true);
+    SkRect rect;
+    rect.setLTRB(10, 10, w - 10, h - 10);
+    canvas->drawOval(rect, paint);
+}
+
+void drawRRect(SkCanvas* canvas) {
+    SkPaint paint;
+    paint.setColor(SK_ColorRED);
+    paint.setAntiAlias(true);
+    SkRect rect;
+    rect.setLTRB(60, 60, w -60, h - 60);
+    SkVector radii[4]{
+        {16, 16},  // 矩形左上角圆角尺寸；
+        {16, 16},  // 矩形右上角圆角尺寸；
+        {16, 16},  // 矩形右下角圆角尺寸；
+        {16, 16}   // 矩形左下角圆角尺寸；
+    };
+    SkRRect rr;
+    rr.setRectRadii(rect, radii);
+    canvas->drawRRect(rr, paint);
+}
+
+void drawLine(SkCanvas* canvas) {
+    SkPaint paint;
+    paint.setColor(SK_ColorRED);
+    paint.setAntiAlias(true);
+    paint.setStroke(true);
+    paint.setStrokeWidth(16);
+    paint.setStrokeCap(SkPaint::Cap::kRound_Cap);
+    canvas->drawLine(80, 80, w - 80, h - 80, paint);
+}
+
+void drawArc(SkCanvas* canvas) {
+    SkPaint paint;
+    paint.setColor(SK_ColorRED);
+    paint.setAntiAlias(true);
+    paint.setStroke(true);
+    paint.setStrokeWidth(16);
+    paint.setStrokeCap(SkPaint::Cap::kRound_Cap);
+    SkRect rect;
+    rect.setLTRB(60, 60, w - 60, h - 60);
+    canvas->drawArc(rect, 0, -90, false, paint);
+}
+
 void setPixel() {    
     surfaceMemory.reset(h * 4 * w);
     SkImageInfo info = SkImageInfo::MakeN32Premul(w, h);
     auto canvas = SkCanvas::MakeRasterDirect(info, surfaceMemory.get(), 4 * w);
     canvas->clear(SK_ColorBLACK);
-    drawCircle(canvas.get());
+    //drawCircle(canvas.get());
+    //drawEllipse(canvas.get());
+    //drawRRect(canvas.get());
+    //drawLine(canvas.get());
+    drawArc(canvas.get());
 }
 
 void paint(const HWND hWnd) {
