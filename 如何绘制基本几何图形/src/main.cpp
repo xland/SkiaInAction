@@ -8,14 +8,22 @@
 int w{ 800 }, h{ 600 };
 SkAutoMalloc surfaceMemory;
 
+void drawCircle(SkCanvas* canvas) {
+    SkPaint paint;
+    paint.setColor(SK_ColorRED);
+    paint.setAntiAlias(true);
+    auto x = w / 2;
+    auto y = h / 2;
+    auto r = std::min(x-10, y-10);
+    canvas->drawCircle(x, y, r, paint);
+}
+
 void setPixel() {    
     surfaceMemory.reset(h * 4 * w);
     SkImageInfo info = SkImageInfo::MakeN32Premul(w, h);
     auto canvas = SkCanvas::MakeRasterDirect(info, surfaceMemory.get(), 4 * w);
     canvas->clear(SK_ColorBLACK);
-    SkPaint paint;
-    paint.setColor(SK_ColorRED);
-    canvas->drawRect(SkRect::MakeLTRB(w - 150, h - 150, w - 10, h - 10), paint);
+    drawCircle(canvas.get());
 }
 
 void paint(const HWND hWnd) {
