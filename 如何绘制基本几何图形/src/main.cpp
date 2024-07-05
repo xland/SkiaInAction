@@ -67,6 +67,21 @@ void drawArc(SkCanvas* canvas) {
     canvas->drawArc(rect, 0, -90, false, paint);
 }
 
+void drawPoint(SkCanvas* canvas) {
+    SkPaint paint;
+    paint.setColor(SK_ColorRED);
+    paint.setAntiAlias(true);
+    paint.setStroke(true);
+    paint.setStrokeWidth(16);
+    paint.setStrokeCap(SkPaint::Cap::kRound_Cap);
+    //canvas->drawPoint(w/2,h/2, paint);
+
+    SkPoint pts[]{ SkPoint::Make(60,60),
+        SkPoint::Make(w / 2,h / 2), 
+        SkPoint::Make(w -60,h -60) };
+    canvas->drawPoints(SkCanvas::PointMode::kPoints_PointMode,3,pts, paint);
+}
+
 void setPixel() {    
     surfaceMemory.reset(h * 4 * w);
     SkImageInfo info = SkImageInfo::MakeN32Premul(w, h);
@@ -76,7 +91,8 @@ void setPixel() {
     //drawEllipse(canvas.get());
     //drawRRect(canvas.get());
     //drawLine(canvas.get());
-    drawArc(canvas.get());
+    //drawArc(canvas.get());
+    drawPoint(canvas.get());
 }
 
 void paint(const HWND hWnd) {
