@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.18)
-set(PROJECT_NAME "DrawSimpleElement")
+set(PROJECT_NAME "SkiaColor")
 project(${PROJECT_NAME})
 
 set(SKIA_INCLUDE_PATH "D:\\sdk\\skia" CACHE PATH "Skia include path,default:D:/sdk/skia" FORCE)
@@ -12,8 +12,6 @@ endif()
 if(NOT IS_DIRECTORY "${SKIA_LIB_PATH}")
     message(FATAL_ERROR "The path ${SKIA_LIB_PATH} does not exist.")
 endif()
-
-
 
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
