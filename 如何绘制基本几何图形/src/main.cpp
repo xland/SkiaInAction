@@ -91,7 +91,7 @@ void drawPath(SkCanvas *canvas)
 {
     SkPaint paint;
     paint.setAntiAlias(true);
-    paint.setColor(0xFF00FF66);
+    paint.setColor(SK_ColorRED);
     paint.setStroke(true);
     paint.setStrokeWidth(16);
     paint.setStrokeJoin(SkPaint::kRound_Join);
@@ -109,7 +109,7 @@ void drawBezierPath(SkCanvas *canvas)
 {
     SkPaint paint;
     paint.setAntiAlias(true);
-    paint.setColor(0xFF00FF66);
+    paint.setColor(SK_ColorRED);
     paint.setStroke(true);
     paint.setStrokeCap(SkPaint::Cap::kRound_Cap);
     paint.setStrokeWidth(6);
