@@ -3,12 +3,38 @@
 #include "include/core/SkSurface.h"
 #include "include/core/SkCanvas.h"
 #include "src/base/SkAutoMalloc.h"
-
-#include "include/effects/SkGradientShader.h"
-#include "include/core/SkPath.h"
+#include "include/core/SkRRect.h"
 
 int w{800}, h{600};
 SkAutoMalloc surfaceMemory;
+
+void drawLinearGradientColor(SkCanvas *canvas)
+{
+    SkPaint paint;
+    paint.setAntiAlias(true);
+    SkPoint pts[2]{SkPoint::Make(0, 0), SkPoint::Make(w, h)};
+    SkColor colors[6]{0xFF00FFFF, 0xFFFFFF66, 0xFFFF00FF, 0xFF66FFFF, 0xFFFFFF00, 0xFFFF66FF};
+    auto shader = SkGradientShader::MakeLinear(pts, colors, nullptr, 6, SkTileMode::kClamp);
+    paint.setShader(shader);
+    auto x = w / 2;
+    auto y = h / 2;
+    auto r = std::min(x - 60, y - 60);
+    canvas->drawCircle(x, y, r, paint);
+}
+
+void drawRadialGradientColor(SkCanvas *canvas)
+{
+    SkPaint paint;
+    paint.setAntiAlias(true);
+    auto x = w / 2;
+    auto y = h / 2;
+    auto r = std::min(x - 60, y - 60);
+    SkPoint pts[2]{SkPoint::Make(0, 0), SkPoint::Make(w, h)};
+    SkColor colors[6]{0xFF00FFFF, 0xFFFFFF66, 0xFFFF00FF, 0xFF66FFFF, 0xFFFFFF00, 0xFFFF66FF};
+    auto shader = SkGradientShader::MakeRadial(SkPoint::Make(x, y), r, colors, nullptr, 6, SkTileMode::kClamp);
+    paint.setShader(shader);
+    canvas->drawCircle(x, y, r, paint);
+}
 
 void setPixel()
 {
@@ -16,6 +42,9 @@ void setPixel()
     SkImageInfo info = SkImageInfo::MakeN32Premul(w, h);
     auto canvas = SkCanvas::MakeRasterDirect(info, surfaceMemory.get(), 4 * w);
     canvas->clear(SK_ColorBLACK);
+    drawCircle(canvas.get());
+    drawLinearGradientColor(canvas.get());
+    drawRadialGradientColor(canvas.get());
 }
 
 void paint(const HWND hWnd)
