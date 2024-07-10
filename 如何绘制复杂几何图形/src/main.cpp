@@ -3,12 +3,46 @@
 #include "include/core/SkSurface.h"
 #include "include/core/SkCanvas.h"
 #include "src/base/SkAutoMalloc.h"
-
-#include "include/effects/SkGradientShader.h"
 #include "include/core/SkPath.h"
+#include "include/pathops/SkPathOps.h"
+#include "include/utils/SkParsePath.h"
 
-int w{800}, h{600};
+int w{400}, h{400};
 SkAutoMalloc surfaceMemory;
+
+void drawMultiPath(SkCanvas* canvas) {
+    SkPath path0;
+    path0.addRect(SkRect::MakeXYWH(100, 100, 100, 100));
+    SkPath path1;
+    path1.addRect(SkRect::MakeXYWH(150, 150, 100, 100));
+    SkPath path;
+    Op(path0, path1, SkPathOp::kXOR_SkPathOp, &path);
+    SkPaint paint;
+    paint.setColor(0xFF00FFFF);
+    canvas->drawPath(path,paint); 
+}
+
+void drawBlendMode(SkCanvas* canvas) {
+    canvas->clear(0);
+    SkPaint paint;
+    paint.setColor(0xFF00FFFF);
+    auto rect1 = SkRect::MakeLTRB(60, h / 2 - 30, w - 60, h / 2 + 30);
+    canvas->drawRect(rect1, paint);
+    paint.setColor(0xFFFFFF00);
+    paint.setBlendMode(SkBlendMode::kSrcOut);
+    auto rect2 = SkRect::MakeLTRB(w / 2 - 30, 60, w / 2 + 30, h - 60);
+    canvas->drawRect(rect2, paint);
+}
+
+void drawEraser(SkCanvas* canvas) {
+    SkPaint paint;
+    paint.setAntiAlias(true);
+    paint.setColor(0xFF00FFFF);
+    auto r = std::min(w/2-60, h/2-60);
+    canvas->drawCircle(w/2,h/2,r,paint);
+    paint.setBlendMode(SkBlendMode::kClear);
+    canvas->drawRect(SkRect::MakeXYWH(w / 2 - 50, h / 2 - 50,100,100), paint);
+}
 
 void setPixel()
 {
@@ -16,6 +50,9 @@ void setPixel()
     SkImageInfo info = SkImageInfo::MakeN32Premul(w, h);
     auto canvas = SkCanvas::MakeRasterDirect(info, surfaceMemory.get(), 4 * w);
     canvas->clear(SK_ColorBLACK);
+    //drawMultiPath(canvas.get());
+    //drawBlendMode(canvas.get());
+    drawEraser(canvas.get());
 }
 
 void paint(const HWND hWnd)
