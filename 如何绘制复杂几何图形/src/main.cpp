@@ -6,6 +6,15 @@
 #include "include/core/SkPath.h"
 #include "include/pathops/SkPathOps.h"
 #include "include/utils/SkParsePath.h"
+#include "include/core/SkColorFilter.h"
+#include "include/effects/SkDiscretePathEffect.h"
+#include "include/effects/SkDashPathEffect.h"
+#include "include/utils/SkShadowUtils.h"
+#include "include/core/SkPoint3.h"
+
+
+#include "include/core/SkMaskFilter.h"
+#include "include/core/SkBlurTypes.h"
 
 int w{400}, h{400};
 SkAutoMalloc surfaceMemory;
@@ -44,6 +53,41 @@ void drawEraser(SkCanvas* canvas) {
     canvas->drawRect(SkRect::MakeXYWH(w / 2 - 50, h / 2 - 50,100,100), paint);
 }
 
+void drawBlur(SkCanvas* canvas) {
+    SkPaint paint;
+    paint.setAntiAlias(true);
+    paint.setColor(0xFF00FFFF);
+    auto filter = SkMaskFilter::MakeBlur(SkBlurStyle::kNormal_SkBlurStyle, 8);
+    SkMaskFilter::MakeBlur(gStyles[i], 8)
+    paint.setMaskFilter(filter);
+    auto r = std::min(w / 2 - 60, h / 2 - 60);
+    canvas->drawCircle(w / 2, h / 2, r, paint);
+}
+
+void drawPathEffect(SkCanvas* canvas) {
+    SkPaint paint;
+    paint.setColor(0xFF00FFFF);
+    paint.setStroke(true);
+    paint.setStrokeWidth(8);
+    paint.setStrokeCap(SkPaint::Cap::kRound_Cap);
+    paint.setStrokeJoin(SkPaint::kRound_Join);
+    paint.setAntiAlias(true);
+    //auto effect = SkDiscretePathEffect::Make(6, 8);
+    SkScalar kIntervals[] = { 12, 16,28,18 };
+    auto effect = SkDashPathEffect::Make(kIntervals, 4, 25);
+    paint.setPathEffect(effect);
+    auto rect = SkRect::MakeLTRB(60, 60, w - 60, h - 60);
+    canvas->drawRect(rect, paint);
+}
+
+void drawPathShadow(SkCanvas* canvas) {
+    SkPath path;
+    path.addRect(SkRect::MakeLTRB(80, 80, w - 80, h - 80));
+    auto zPlaneParams = SkPoint3::Make(0, 0, 80);// 定义阴影与 z 平面的关系    
+    auto lightPos = SkPoint3::Make(0, 0, 0);// 定义光源的位置和半径
+    SkShadowUtils::DrawShadow(canvas, path, zPlaneParams, lightPos, 80.f, 0xFF00FFFF, SK_ColorTRANSPARENT);
+}
+
 void setPixel()
 {
     surfaceMemory.reset(h * 4 * w);
@@ -52,7 +96,10 @@ void setPixel()
     canvas->clear(SK_ColorBLACK);
     //drawMultiPath(canvas.get());
     //drawBlendMode(canvas.get());
-    drawEraser(canvas.get());
+    //drawEraser(canvas.get());
+    //drawPathEffect(canvas.get());
+    //drawPathShadow(canvas.get());
+    drawBlur(canvas.get());
 }
 
 void paint(const HWND hWnd)
