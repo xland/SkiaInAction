@@ -7,6 +7,8 @@
 #include "include/effects/SkGradientShader.h"
 #include "include/effects/SkPerlinNoiseShader.h"
 
+#include "include/core/SkBitmap.h"
+
 int w{500}, h{500};
 SkAutoMalloc surfaceMemory;
 
@@ -70,6 +72,36 @@ void drawNoiseColor(SkCanvas* canvas) {
     canvas->drawPaint(paint);
 }
 
+void averageColor(SkCanvas* canvas) {
+    SkColor colorArr[6]{ 0xFF123456,0xFF654321,0xFF789ABC,0xFFABC789,0xFFDEF123,0xFF123DEF };
+    SkColor4f averageColor{ SkColors::kTransparent };
+    for (size_t i = 0; i < 6; i++)
+    {
+        auto tempColor = SkColor4f::FromColor(colorArr[i]);
+        averageColor.fA += tempColor.fA;
+        averageColor.fR += tempColor.fR;
+        averageColor.fG += tempColor.fG;
+        averageColor.fB += tempColor.fB;
+    }
+    averageColor.fR /= 6;
+    averageColor.fG /= 6;
+    averageColor.fB /= 6;
+    averageColor.fA /= 6;
+    auto color = averageColor.toSkColor();
+    canvas->clear(averageColor);
+}
+
+void colorOverlay(SkCanvas* canvas) {
+    SkBitmap bitmap;
+    bitmap.allocN32Pixels(1, 1);
+    SkCanvas tempCanvas(bitmap);
+    tempCanvas.drawColor(0x88DD3456);
+    tempCanvas.drawColor(0x88654321);
+    void* pixels = bitmap.getPixels();
+    auto result = *(SkColor*)pixels;
+    canvas->clear(result);
+}
+
 void setPixel()
 {
     surfaceMemory.reset(h * 4 * w);
@@ -81,6 +113,8 @@ void setPixel()
     //drawConicalGradientColor(canvas.get());
     //drawSweepGradientColor(canvas.get());
     //drawNoiseColor(canvas.get());
+    //averageColor(canvas.get());
+    colorOverlay(canvas.get());
 }
 
 void paint(const HWND hWnd)

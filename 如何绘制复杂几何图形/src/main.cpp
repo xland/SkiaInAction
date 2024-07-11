@@ -16,6 +16,8 @@
 #include "include/core/SkMaskFilter.h"
 #include "include/core/SkBlurTypes.h"
 
+#include <vector>
+
 int w{400}, h{400};
 SkAutoMalloc surfaceMemory;
 
@@ -58,7 +60,6 @@ void drawBlur(SkCanvas* canvas) {
     paint.setAntiAlias(true);
     paint.setColor(0xFF00FFFF);
     auto filter = SkMaskFilter::MakeBlur(SkBlurStyle::kNormal_SkBlurStyle, 8);
-    SkMaskFilter::MakeBlur(gStyles[i], 8)
     paint.setMaskFilter(filter);
     auto r = std::min(w / 2 - 60, h / 2 - 60);
     canvas->drawCircle(w / 2, h / 2, r, paint);
@@ -83,9 +84,33 @@ void drawPathEffect(SkCanvas* canvas) {
 void drawPathShadow(SkCanvas* canvas) {
     SkPath path;
     path.addRect(SkRect::MakeLTRB(80, 80, w - 80, h - 80));
-    auto zPlaneParams = SkPoint3::Make(0, 0, 80);// 定义阴影与 z 平面的关系    
-    auto lightPos = SkPoint3::Make(0, 0, 0);// 定义光源的位置和半径
+    auto zPlaneParams = SkPoint3::Make(0, 0, 80);
+    auto lightPos = SkPoint3::Make(0, 0, 0);
     SkShadowUtils::DrawShadow(canvas, path, zPlaneParams, lightPos, 80.f, 0xFF00FFFF, SK_ColorTRANSPARENT);
+}
+
+void drawPixel(SkCanvas* canvas) {
+    SkImageInfo info = SkImageInfo::MakeN32Premul(w, h);
+    std::vector<SkColor> pixels;    
+    for (int y = 0; y < h; ++y) {
+        for (int x = 0; x < w; ++x) {
+            auto val = x % 30;
+            if (val == 0) {
+                pixels.push_back(0xFFFF00FF);
+            }
+            else if(val == 10)
+            {
+                pixels.push_back(0xFFFFFF00);
+            }
+            else if(val == 20) {
+                pixels.push_back(0xFF00FFFF);
+            }
+            else {
+                pixels.push_back(0xFF0000FF);
+            }
+        }
+    }
+    canvas->writePixels(info, &pixels.front(), w*4, 0, 0);
 }
 
 void setPixel()
@@ -99,7 +124,8 @@ void setPixel()
     //drawEraser(canvas.get());
     //drawPathEffect(canvas.get());
     //drawPathShadow(canvas.get());
-    drawBlur(canvas.get());
+    //drawBlur(canvas.get());
+    drawPixel(canvas.get());
 }
 
 void paint(const HWND hWnd)
