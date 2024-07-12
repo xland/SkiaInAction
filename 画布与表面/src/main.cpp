@@ -21,73 +21,85 @@
 int w{400}, h{400};
 SkAutoMalloc surfaceMemory;
 
-void drawMultiPath(SkCanvas* canvas) {
-    SkPath path0;
-    path0.addRect(SkRect::MakeXYWH(100, 100, 100, 100));
-    SkPath path1;
-    path1.addRect(SkRect::MakeXYWH(150, 150, 100, 100));
-    SkPath path;
-    Op(path0, path1, SkPathOp::kXOR_SkPathOp, &path);
+void translateCanvas(SkCanvas* canvas) {
+    auto rect = SkRect::MakeXYWH(10, 10, 80, 80);
     SkPaint paint;
-    paint.setColor(0xFF00FFFF);
-    canvas->drawPath(path,paint); 
-}
-
-void drawBlendMode(SkCanvas* canvas) {
-    canvas->clear(0);
-    SkPaint paint;
-    paint.setColor(0xFF00FFFF);
-    auto rect1 = SkRect::MakeLTRB(60, h / 2 - 30, w - 60, h / 2 + 30);
-    canvas->drawRect(rect1, paint);
-    paint.setColor(0xFFFFFF00);
-    paint.setBlendMode(SkBlendMode::kSrcOut);
-    auto rect2 = SkRect::MakeLTRB(w / 2 - 30, 60, w / 2 + 30, h - 60);
-    canvas->drawRect(rect2, paint);
-}
-
-void drawEraser(SkCanvas* canvas) {
-    SkPaint paint;
-    paint.setAntiAlias(true);
-    paint.setColor(0xFF00FFFF);
-    auto r = std::min(w/2-60, h/2-60);
-    canvas->drawCircle(w/2,h/2,r,paint);
-    paint.setBlendMode(SkBlendMode::kClear);
-    canvas->drawRect(SkRect::MakeXYWH(w / 2 - 50, h / 2 - 50,100,100), paint);
-}
-
-void drawBlur(SkCanvas* canvas) {
-    SkPaint paint;
-    paint.setAntiAlias(true);
-    paint.setColor(0xFF00FFFF);
-    auto filter = SkMaskFilter::MakeBlur(SkBlurStyle::kNormal_SkBlurStyle, 8);
-    paint.setMaskFilter(filter);
-    auto r = std::min(w / 2 - 60, h / 2 - 60);
-    canvas->drawCircle(w / 2, h / 2, r, paint);
-}
-
-void drawPathEffect(SkCanvas* canvas) {
-    SkPaint paint;
-    paint.setColor(0xFF00FFFF);
-    paint.setStroke(true);
-    paint.setStrokeWidth(8);
-    paint.setStrokeCap(SkPaint::Cap::kRound_Cap);
-    paint.setStrokeJoin(SkPaint::kRound_Join);
-    paint.setAntiAlias(true);
-    //auto effect = SkDiscretePathEffect::Make(6, 8);
-    SkScalar kIntervals[] = { 12, 16,28,18 };
-    auto effect = SkDashPathEffect::Make(kIntervals, 4, 25);
-    paint.setPathEffect(effect);
-    auto rect = SkRect::MakeLTRB(60, 60, w - 60, h - 60);
+    paint.setColor(0xff00ffff);
+    canvas->drawRect(rect, paint);
+    canvas->translate(90, 90);
+    paint.setColor(0xffff00ff);
+    canvas->drawRect(rect, paint);
+    canvas->translate(90, 90);
+    paint.setColor(0xffffff00);
     canvas->drawRect(rect, paint);
 }
 
-void drawPathShadow(SkCanvas* canvas) {
-    SkPath path;
-    path.addRect(SkRect::MakeLTRB(80, 80, w - 80, h - 80));
-    auto zPlaneParams = SkPoint3::Make(0, 0, 80);
-    auto lightPos = SkPoint3::Make(0, 0, 0);
-    SkShadowUtils::DrawShadow(canvas, path, zPlaneParams, lightPos, 80.f, 0xFF00FFFF, SK_ColorTRANSPARENT);
+void skewCanvas(SkCanvas* canvas) {
+    auto rect = SkRect::MakeXYWH(60, 60, 80, 80);
+    SkPaint paint;
+    paint.setAntiAlias(true);
+    paint.setColor(0xff00ffff);
+    canvas->drawRect(rect, paint);
+
+    canvas->save();
+    canvas->translate(60, 140);
+    float angleX = SkDegreesToRadians(45);
+    auto val = std::tan(angleX);
+    canvas->skew(val, 0);
+    paint.setColor(0xffff00ff);
+    paint.setStroke(false);
+    rect = SkRect::MakeXYWH(0, 0, 80, 80);
+    canvas->drawRect(rect, paint);
+
+    canvas->restore();
+    canvas->translate(140, 60);
+    canvas->skew(0, val);
+    paint.setColor(0xffffff00);
+    paint.setStroke(false);
+    rect = SkRect::MakeXYWH(0, 0, 80, 80);
+    canvas->drawRect(rect, paint);
+    canvas->restore();
 }
+
+void saveCanvas(SkCanvas* canvas) {
+    auto rect = SkRect::MakeXYWH(20, 20, 100, 100);
+    SkPaint paint;
+    paint.setAntiAlias(true);
+    paint.setColor(0xff00ffff);
+    canvas->drawRect(rect, paint);
+
+    SkRect bounds = SkRect::MakeLTRB(0, 0, w, h);
+    SkPaint layerPaint;
+    layerPaint.setAlphaf(0.5f);
+    canvas->saveLayer(&bounds, &layerPaint);
+
+    rect = SkRect::MakeXYWH(80, 80, 100, 100);
+    paint.setColor(0xffff00ff);
+    canvas->drawRect(rect, paint);
+
+    canvas->restore();
+}
+
+void clipCanvas(SkCanvas* canvas) {
+    canvas->save();
+    auto rect = SkRect::MakeXYWH(0, 0, w/2, h/2);
+    canvas->clipRect(rect);
+
+    SkPaint paint;
+    paint.setAntiAlias(true);
+    paint.setColor(0xff00ffff);
+    auto r = std::min(w / 2, h / 2);
+    canvas->drawCircle(SkPoint::Make(w / 2, h / 2), r,paint);
+    canvas->restore();
+
+    canvas->save();
+    rect = SkRect::MakeXYWH(w / 2, h / 2, w / 2, h / 2);
+    canvas->clipRect(rect);
+    paint.setColor(0xffffff00);
+    canvas->drawCircle(SkPoint::Make(w / 2, h / 2), r, paint);
+    canvas->restore();
+}
+
 
 void drawPixel(SkCanvas* canvas) {
     SkImageInfo info = SkImageInfo::MakeN32Premul(w, h);
@@ -119,13 +131,20 @@ void setPixel()
     SkImageInfo info = SkImageInfo::MakeN32Premul(w, h);
     auto canvas = SkCanvas::MakeRasterDirect(info, surfaceMemory.get(), 4 * w);
     canvas->clear(SK_ColorBLACK);
-    //drawMultiPath(canvas.get());
-    //drawBlendMode(canvas.get());
-    //drawEraser(canvas.get());
-    //drawPathEffect(canvas.get());
-    //drawPathShadow(canvas.get());
-    //drawBlur(canvas.get());
-    drawPixel(canvas.get());
+    //drawPixel(canvas.get());
+    //translateCanvas(canvas.get());
+    //skewCanvas(canvas.get());
+    //saveCanvas(canvas.get());    
+    //clipCanvas(canvas.get());
+    auto rect = SkRect::MakeXYWH(20, 20, 100, 100);
+    std::string annotationKey = "myAnnotation";
+    std::string annotationValue = "This is a custom annotation.";
+    SkPaint paint;
+    paint.setAntiAlias(true);
+    paint.setColor(0xff00ffff);
+    canvas->drawRect(rect, paint);
+    canvas->drawAnnotation(rect, annotationKey.c_str(),nullptr);
+    
 }
 
 void paint(const HWND hWnd)
