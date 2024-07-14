@@ -34,6 +34,16 @@ void translateCanvas(SkCanvas* canvas) {
     canvas->drawRect(rect, paint);
 }
 
+void rotateCanvas(SkCanvas* canvas) {
+    auto rect = SkRect::MakeXYWH(w/2-50, h/2-100, 100, 200);
+    SkPaint paint;
+    paint.setColor(0xff00ffff);
+    canvas->drawRect(rect, paint);
+    canvas->rotate(-45, w / 2, h / 2);
+    paint.setColor(0xffffff00);
+    canvas->drawRect(rect, paint);
+}
+
 void skewCanvas(SkCanvas* canvas) {
     auto rect = SkRect::MakeXYWH(60, 60, 80, 80);
     SkPaint paint;
@@ -43,9 +53,7 @@ void skewCanvas(SkCanvas* canvas) {
 
     canvas->save();
     canvas->translate(60, 140);
-    float angleX = SkDegreesToRadians(45);
-    auto val = std::tan(angleX);
-    canvas->skew(val, 0);
+    canvas->skew(1, 0);
     paint.setColor(0xffff00ff);
     paint.setStroke(false);
     rect = SkRect::MakeXYWH(0, 0, 80, 80);
@@ -53,12 +61,11 @@ void skewCanvas(SkCanvas* canvas) {
 
     canvas->restore();
     canvas->translate(140, 60);
-    canvas->skew(0, val);
+    canvas->skew(0, 1);
     paint.setColor(0xffffff00);
     paint.setStroke(false);
     rect = SkRect::MakeXYWH(0, 0, 80, 80);
     canvas->drawRect(rect, paint);
-    canvas->restore();
 }
 
 void saveCanvas(SkCanvas* canvas) {
@@ -68,15 +75,14 @@ void saveCanvas(SkCanvas* canvas) {
     paint.setColor(0xff00ffff);
     canvas->drawRect(rect, paint);
 
-    SkRect bounds = SkRect::MakeLTRB(0, 0, w, h);
+    SkRect bounds = SkRect::MakeLTRB(0, 0, 160, 160);
     SkPaint layerPaint;
     layerPaint.setAlphaf(0.5f);
     canvas->saveLayer(&bounds, &layerPaint);
 
-    rect = SkRect::MakeXYWH(80, 80, 100, 100);
+    rect = SkRect::MakeXYWH(80, 80, 200, 200);
     paint.setColor(0xffff00ff);
     canvas->drawRect(rect, paint);
-
     canvas->restore();
 }
 
@@ -134,16 +140,9 @@ void setPixel()
     //drawPixel(canvas.get());
     //translateCanvas(canvas.get());
     //skewCanvas(canvas.get());
-    //saveCanvas(canvas.get());    
+    saveCanvas(canvas.get());    
     //clipCanvas(canvas.get());
-    auto rect = SkRect::MakeXYWH(20, 20, 100, 100);
-    std::string annotationKey = "myAnnotation";
-    std::string annotationValue = "This is a custom annotation.";
-    SkPaint paint;
-    paint.setAntiAlias(true);
-    paint.setColor(0xff00ffff);
-    canvas->drawRect(rect, paint);
-    canvas->drawAnnotation(rect, annotationKey.c_str(),nullptr);
+    //rotateCanvas(canvas.get());
     
 }
 
