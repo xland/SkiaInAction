@@ -2,7 +2,6 @@
 #include <string>
 #include "include/core/SkSurface.h"
 #include "include/core/SkCanvas.h"
-#include "src/base/SkAutoMalloc.h"
 #include "include/core/SkPath.h"
 #include "include/pathops/SkPathOps.h"
 #include "include/utils/SkParsePath.h"
@@ -12,16 +11,16 @@
 #include "include/utils/SkShadowUtils.h"
 #include "include/core/SkPoint3.h"
 
-
 #include "include/core/SkMaskFilter.h"
 #include "include/core/SkBlurTypes.h"
 
 #include <vector>
 
 int w{400}, h{400};
-SkAutoMalloc surfaceMemory;
+std::vector<SkColor> surfaceMemory;
 
-void translateCanvas(SkCanvas* canvas) {
+void translateCanvas(SkCanvas *canvas)
+{
     auto rect = SkRect::MakeXYWH(10, 10, 80, 80);
     SkPaint paint;
     paint.setColor(0xff00ffff);
@@ -34,8 +33,9 @@ void translateCanvas(SkCanvas* canvas) {
     canvas->drawRect(rect, paint);
 }
 
-void rotateCanvas(SkCanvas* canvas) {
-    auto rect = SkRect::MakeXYWH(w/2-50, h/2-100, 100, 200);
+void rotateCanvas(SkCanvas *canvas)
+{
+    auto rect = SkRect::MakeXYWH(w / 2 - 50, h / 2 - 100, 100, 200);
     SkPaint paint;
     paint.setColor(0xff00ffff);
     canvas->drawRect(rect, paint);
@@ -44,7 +44,8 @@ void rotateCanvas(SkCanvas* canvas) {
     canvas->drawRect(rect, paint);
 }
 
-void skewCanvas(SkCanvas* canvas) {
+void skewCanvas(SkCanvas *canvas)
+{
     auto rect = SkRect::MakeXYWH(60, 60, 80, 80);
     SkPaint paint;
     paint.setAntiAlias(true);
@@ -68,7 +69,8 @@ void skewCanvas(SkCanvas* canvas) {
     canvas->drawRect(rect, paint);
 }
 
-void saveCanvas(SkCanvas* canvas) {
+void saveCanvas(SkCanvas *canvas)
+{
     auto rect = SkRect::MakeXYWH(20, 20, 100, 100);
     SkPaint paint;
     paint.setAntiAlias(true);
@@ -86,17 +88,18 @@ void saveCanvas(SkCanvas* canvas) {
     canvas->restore();
 }
 
-void clipCanvas(SkCanvas* canvas) {
+void clipCanvas(SkCanvas *canvas)
+{
     canvas->save();
-    auto rect = SkRect::MakeXYWH(0, 0, w/2, h/2);
+    auto rect = SkRect::MakeXYWH(0, 0, w / 2, h / 2);
     canvas->clipRect(rect);
     canvas->clipShader()
 
-    SkPaint paint;
+        SkPaint paint;
     paint.setAntiAlias(true);
     paint.setColor(0xff00ffff);
     auto r = std::min(w / 2, h / 2);
-    canvas->drawCircle(SkPoint::Make(w / 2, h / 2), r,paint);
+    canvas->drawCircle(SkPoint::Make(w / 2, h / 2), r, paint);
     canvas->restore();
 
     canvas->save();
@@ -107,44 +110,48 @@ void clipCanvas(SkCanvas* canvas) {
     canvas->restore();
 }
 
-
-void drawPixel(SkCanvas* canvas) {
+void drawPixel(SkCanvas *canvas)
+{
     SkImageInfo info = SkImageInfo::MakeN32Premul(w, h);
-    std::vector<SkColor> pixels;    
-    for (int y = 0; y < h; ++y) {
-        for (int x = 0; x < w; ++x) {
+    std::vector<SkColor> pixels;
+    for (int y = 0; y < h; ++y)
+    {
+        for (int x = 0; x < w; ++x)
+        {
             auto val = x % 30;
-            if (val == 0) {
+            if (val == 0)
+            {
                 pixels.push_back(0xFFFF00FF);
             }
-            else if(val == 10)
+            else if (val == 10)
             {
                 pixels.push_back(0xFFFFFF00);
             }
-            else if(val == 20) {
+            else if (val == 20)
+            {
                 pixels.push_back(0xFF00FFFF);
             }
-            else {
+            else
+            {
                 pixels.push_back(0xFF0000FF);
             }
         }
     }
-    canvas->writePixels(info, &pixels.front(), w*4, 0, 0);
+    canvas->writePixels(info, &pixels.front(), w * 4, 0, 0);
 }
 
 void setPixel()
 {
-    surfaceMemory.reset(h * 4 * w);
+    surfaceMemory.resize(w * h);
     SkImageInfo info = SkImageInfo::MakeN32Premul(w, h);
     auto canvas = SkCanvas::MakeRasterDirect(info, surfaceMemory.get(), 4 * w);
     canvas->clear(SK_ColorBLACK);
-    //drawPixel(canvas.get());
-    //translateCanvas(canvas.get());
-    //skewCanvas(canvas.get());
-    saveCanvas(canvas.get());    
-    //clipCanvas(canvas.get());
-    //rotateCanvas(canvas.get());
-    
+    // drawPixel(canvas.get());
+    // translateCanvas(canvas.get());
+    // skewCanvas(canvas.get());
+    saveCanvas(canvas.get());
+    // clipCanvas(canvas.get());
+    // rotateCanvas(canvas.get());
 }
 
 void paint(const HWND hWnd)
@@ -155,7 +162,8 @@ void paint(const HWND hWnd)
     StretchDIBits(dc, 0, 0, w, h, 0, 0, w, h, surfaceMemory.get(), &info, DIB_RGB_COLORS, SRCCOPY);
     ReleaseDC(hWnd, dc);
     EndPaint(hWnd, &ps);
-    surfaceMemory.reset(0);
+    std::vector<SkColor> vec;
+    surfaceMemory.swap(vec);
 }
 
 LRESULT CALLBACK wndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)

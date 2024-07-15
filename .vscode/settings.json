@@ -1,3 +1,20 @@
 {
-    "cmake.sourceDirectory": "D:/project/SkiaInAction/RasterAndOpenGL"
+  "cmake.sourceDirectory": "D:/project/SkiaInAction/RasterAndOpenGL",
+  "files.associations": {
+    "array": "cpp",
+    "format": "cpp",
+    "istream": "cpp",
+    "memory": "cpp",
+    "tuple": "cpp",
+    "type_traits": "cpp",
+    "utility": "cpp",
+    "variant": "cpp",
+    "xlocmes": "cpp",
+    "xlocmon": "cpp",
+    "xlocnum": "cpp",
+    "xloctime": "cpp",
+    "xutility": "cpp",
+    "locale": "cpp",
+    "thread": "cpp"
+  }
 }

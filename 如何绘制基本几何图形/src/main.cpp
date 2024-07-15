@@ -2,11 +2,10 @@
 #include <string>
 #include "include/core/SkSurface.h"
 #include "include/core/SkCanvas.h"
-#include "src/base/SkAutoMalloc.h"
 #include "include/core/SkRRect.h"
 
 int w{800}, h{600};
-SkAutoMalloc surfaceMemory;
+std::vector<SkColor> surfaceMemory;
 
 void drawCircle(SkCanvas *canvas)
 {
@@ -121,7 +120,7 @@ void drawBezierPath(SkCanvas *canvas)
 
 void setPixel()
 {
-    surfaceMemory.reset(h * 4 * w);
+    surfaceMemory.resize(w * h);
     SkImageInfo info = SkImageInfo::MakeN32Premul(w, h);
     auto canvas = SkCanvas::MakeRasterDirect(info, surfaceMemory.get(), 4 * w);
     canvas->clear(SK_ColorBLACK);
@@ -143,7 +142,8 @@ void paint(const HWND hWnd)
     StretchDIBits(dc, 0, 0, w, h, 0, 0, w, h, surfaceMemory.get(), &info, DIB_RGB_COLORS, SRCCOPY);
     ReleaseDC(hWnd, dc);
     EndPaint(hWnd, &ps);
-    surfaceMemory.reset(0);
+    std::vector<SkColor> vec;
+    surfaceMemory.swap(vec);
 }
 
 LRESULT CALLBACK wndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
