@@ -2,6 +2,7 @@
 #include <string>
 #include "include/core/SkSurface.h"
 #include "include/core/SkCanvas.h"
+#include <vector>
 
 int w{800}, h{600};
 std::vector<SkColor> surfaceMemory;
@@ -10,7 +11,7 @@ void setPixel()
 {
     surfaceMemory.resize(w * h);
     SkImageInfo info = SkImageInfo::MakeN32Premul(w, h);
-    auto canvas = SkCanvas::MakeRasterDirect(info, surfaceMemory.get(), 4 * w);
+    auto canvas = SkCanvas::MakeRasterDirect(info, &surfaceMemory.front(), 4 * w);
     canvas->clear(SK_ColorBLACK);
     SkPaint paint;
     paint.setColor(SK_ColorRED);
@@ -22,7 +23,7 @@ void paint(const HWND hWnd)
     PAINTSTRUCT ps;
     auto dc = BeginPaint(hWnd, &ps);
     BITMAPINFO info = {sizeof(BITMAPINFOHEADER), w, 0 - h, 1, 32, BI_RGB, h * 4 * w, 0, 0, 0, 0};
-    StretchDIBits(dc, 0, 0, w, h, 0, 0, w, h, surfaceMemory.get(), &info, DIB_RGB_COLORS, SRCCOPY);
+    StretchDIBits(dc, 0, 0, w, h, 0, 0, w, h, &surfaceMemory.front(), &info, DIB_RGB_COLORS, SRCCOPY);
     ReleaseDC(hWnd, dc);
     EndPaint(hWnd, &ps);
     std::vector<SkColor> vec;

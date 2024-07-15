@@ -31,7 +31,7 @@ void setPixel()
 {
     surfaceMemory.resize(w*h);
     SkImageInfo info = SkImageInfo::MakeN32Premul(w, h);
-    auto size = sizeof(uint32_t);
+    auto size = sizeof(SkColor);
     auto surface = SkSurfaces::WrapPixels(info, &surfaceMemory.front(), w * 4);
     auto canvas = surface->getCanvas();
     //auto canvas = SkCanvas::MakeRasterDirect(info, surfaceMemory.get(), 4 * w);
