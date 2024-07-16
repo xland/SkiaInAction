@@ -145,7 +145,6 @@ void setPixel()
     surfaceMemory.resize(w * h);
     SkImageInfo info = SkImageInfo::MakeN32Premul(w, h);
     auto canvas = SkCanvas::MakeRasterDirect(info, surfaceMemory.get(), 4 * w);
-    canvas->clear(SK_ColorBLACK);
     // drawPixel(canvas.get());
     // translateCanvas(canvas.get());
     // skewCanvas(canvas.get());

@@ -11,32 +11,30 @@
 #include "include/utils/SkShadowUtils.h"
 #include "include/core/SkPoint3.h"
 
-
 #include "include/core/SkMaskFilter.h"
 #include "include/core/SkBlurTypes.h"
+#include "include/core/SkColorSpace.h"
 
 #include <vector>
 
 int w{400}, h{400};
-std::vector<SkColor> surfaceMemory;
+std::vector<SkColor> surfaceMemory(w* h, 0xffff00);
+//std::vector<std::uint8_t> surfaceMemory;
 
-
-void saveCanvas(SkCanvas* canvas) {
-    SkPaint paint;
-    paint.setColor(0xFF00FFFF);
-    canvas->drawRect(SkRect::MakeLTRB(w-120, h-120, w-20, h-20), paint);
+void saveCanvas(SkCanvas *canvas)
+{
+    //SkPaint paint;
+    //paint.setColor(0xFF00FFFF);
+    //canvas->drawRect(SkRect::MakeLTRB(w - 120, h - 120, w - 20, h - 20), paint);
 }
 
 void setPixel()
 {
-    surfaceMemory.resize(w*h);
+    //surfaceMemory.resize(w * h,0xffff00);
     SkImageInfo info = SkImageInfo::MakeN32Premul(w, h);
     auto size = sizeof(SkColor);
     auto surface = SkSurfaces::WrapPixels(info, &surfaceMemory.front(), w * 4);
     auto canvas = surface->getCanvas();
-    //auto canvas = SkCanvas::MakeRasterDirect(info, surfaceMemory.get(), 4 * w);
-    canvas->clear(SK_ColorBLACK);
-    //saveCanvas(canvas.get());
     saveCanvas(canvas);
 }
 

@@ -12,7 +12,6 @@ void setPixel()
     surfaceMemory.resize(w * h);
     SkImageInfo info = SkImageInfo::MakeN32Premul(w, h);
     auto canvas = SkCanvas::MakeRasterDirect(info, &surfaceMemory.front(), 4 * w);
-    canvas->clear(SK_ColorBLACK);
     SkPaint paint;
     paint.setColor(SK_ColorRED);
     canvas->drawRect(SkRect::MakeLTRB(w - 150, h - 150, w - 10, h - 10), paint);
