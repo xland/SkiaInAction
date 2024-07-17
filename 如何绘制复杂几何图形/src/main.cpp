@@ -32,30 +32,6 @@ void drawMultiPath(SkCanvas *canvas)
     canvas->drawPath(path, paint);
 }
 
-void drawBlendMode(SkCanvas *canvas)
-{
-    canvas->clear(0);
-    SkPaint paint;
-    paint.setColor(0xFF00FFFF);
-    auto rect1 = SkRect::MakeLTRB(60, h / 2 - 30, w - 60, h / 2 + 30);
-    canvas->drawRect(rect1, paint);
-    paint.setColor(0xFFFFFF00);
-    paint.setBlendMode(SkBlendMode::kSrcOut);
-    auto rect2 = SkRect::MakeLTRB(w / 2 - 30, 60, w / 2 + 30, h - 60);
-    canvas->drawRect(rect2, paint);
-}
-
-void drawEraser(SkCanvas *canvas)
-{
-    SkPaint paint;
-    paint.setAntiAlias(true);
-    paint.setColor(0xFF00FFFF);
-    auto r = std::min(w / 2 - 60, h / 2 - 60);
-    canvas->drawCircle(w / 2, h / 2, r, paint);
-    paint.setBlendMode(SkBlendMode::kClear);
-    canvas->drawRect(SkRect::MakeXYWH(w / 2 - 50, h / 2 - 50, 100, 100), paint);
-}
-
 void drawBlur(SkCanvas *canvas)
 {
     SkPaint paint;
@@ -125,12 +101,10 @@ void drawPixel(SkCanvas *canvas)
 
 void setPixel()
 {
-    surfaceMemory.resize(w * h);
+    surfaceMemory.resize(w * h, 0xff000000);
     SkImageInfo info = SkImageInfo::MakeN32Premul(w, h);
-    auto canvas = SkCanvas::MakeRasterDirect(info, surfaceMemory.get(), 4 * w);
+    auto canvas = SkCanvas::MakeRasterDirect(info, &surfaceMemory.front(), 4 * w);
     // drawMultiPath(canvas.get());
-    // drawBlendMode(canvas.get());
-    // drawEraser(canvas.get());
     // drawPathEffect(canvas.get());
     // drawPathShadow(canvas.get());
     // drawBlur(canvas.get());
@@ -142,7 +116,7 @@ void paint(const HWND hWnd)
     PAINTSTRUCT ps;
     auto dc = BeginPaint(hWnd, &ps);
     BITMAPINFO info = {sizeof(BITMAPINFOHEADER), w, 0 - h, 1, 32, BI_RGB, h * 4 * w, 0, 0, 0, 0};
-    StretchDIBits(dc, 0, 0, w, h, 0, 0, w, h, surfaceMemory.get(), &info, DIB_RGB_COLORS, SRCCOPY);
+    StretchDIBits(dc, 0, 0, w, h, 0, 0, w, h, &surfaceMemory.front(), &info, DIB_RGB_COLORS, SRCCOPY);
     ReleaseDC(hWnd, dc);
     EndPaint(hWnd, &ps);
     std::vector<SkColor> vec;

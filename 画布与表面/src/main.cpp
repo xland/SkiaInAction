@@ -10,7 +10,7 @@
 #include "include/effects/SkDashPathEffect.h"
 #include "include/utils/SkShadowUtils.h"
 #include "include/core/SkPoint3.h"
-
+#include "include/effects/SkGradientShader.h"
 #include "include/core/SkMaskFilter.h"
 #include "include/core/SkBlurTypes.h"
 
@@ -93,9 +93,8 @@ void clipCanvas(SkCanvas *canvas)
     canvas->save();
     auto rect = SkRect::MakeXYWH(0, 0, w / 2, h / 2);
     canvas->clipRect(rect);
-    canvas->clipShader()
-
-        SkPaint paint;
+    
+    SkPaint paint;
     paint.setAntiAlias(true);
     paint.setColor(0xff00ffff);
     auto r = std::min(w / 2, h / 2);
@@ -140,17 +139,38 @@ void drawPixel(SkCanvas *canvas)
     canvas->writePixels(info, &pixels.front(), w * 4, 0, 0);
 }
 
+void drawEraser(SkCanvas* canvas)
+{
+    SkPaint paint;
+    paint.setAntiAlias(true);
+    SkPoint pts[2]{ SkPoint::Make(0, 0), SkPoint::Make(w, h) };
+    SkColor colors[6]{ 0xFF00FFFF, 0xFFFF00FF, 0xFFFFFF00, 0xFF0000FF, 0xFF00FF00, 0xFFFF0000 };
+    auto shader = SkGradientShader::MakeLinear(pts, colors, nullptr, 6, SkTileMode::kClamp);
+    paint.setShader(shader);
+    canvas->drawPaint(paint);
+
+    canvas->saveLayer(SkRect::MakeXYWH(0, 0, w, h), nullptr);
+    paint.setShader(nullptr);
+    paint.setColor(0xFF00FFFF);
+    auto r = std::min(w / 2 - 60, h / 2 - 60);
+    canvas->drawCircle(w / 2, h / 2, r, paint);
+    paint.setBlendMode(SkBlendMode::kClear);
+    canvas->drawRect(SkRect::MakeXYWH(w / 2 - 50, h / 2 - 50, 100, 100), paint);
+    canvas->restore();
+}
+
 void setPixel()
 {
-    surfaceMemory.resize(w * h);
+    surfaceMemory.resize(w * h, 0xff000000);
     SkImageInfo info = SkImageInfo::MakeN32Premul(w, h);
-    auto canvas = SkCanvas::MakeRasterDirect(info, surfaceMemory.get(), 4 * w);
+    auto canvas = SkCanvas::MakeRasterDirect(info, &surfaceMemory.front(), 4 * w);
     // drawPixel(canvas.get());
     // translateCanvas(canvas.get());
     // skewCanvas(canvas.get());
-    saveCanvas(canvas.get());
+    //saveCanvas(canvas.get());
     // clipCanvas(canvas.get());
     // rotateCanvas(canvas.get());
+    drawEraser(canvas.get());
 }
 
 void paint(const HWND hWnd)
@@ -158,7 +178,7 @@ void paint(const HWND hWnd)
     PAINTSTRUCT ps;
     auto dc = BeginPaint(hWnd, &ps);
     BITMAPINFO info = {sizeof(BITMAPINFOHEADER), w, 0 - h, 1, 32, BI_RGB, h * 4 * w, 0, 0, 0, 0};
-    StretchDIBits(dc, 0, 0, w, h, 0, 0, w, h, surfaceMemory.get(), &info, DIB_RGB_COLORS, SRCCOPY);
+    StretchDIBits(dc, 0, 0, w, h, 0, 0, w, h, &surfaceMemory.front(), &info, DIB_RGB_COLORS, SRCCOPY);
     ReleaseDC(hWnd, dc);
     EndPaint(hWnd, &ps);
     std::vector<SkColor> vec;

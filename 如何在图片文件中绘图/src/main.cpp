@@ -8,17 +8,16 @@
 
 int APIENTRY wWinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _In_ LPTSTR lpCmdLine, _In_ int nCmdShow)
 {
-    // auto inputStream = std::make_unique<SkFILEStream>("allen-image1.png");
-    // auto codec = SkCodec::MakeFromStream(std::move(inputStream));
-    // auto imgInfo = codec->getInfo();
-    // SkBitmap bitmap;
-    // bitmap.allocPixels(imgInfo);
-    // SkCodec::Result result = codec->getPixels(imgInfo, bitmap.getPixels(), bitmap.rowBytes());
-    // auto surface = SkSurfaces::WrapPixels(bitmap.pixmap());
+     //auto inputStream = std::make_unique<SkFILEStream>("allen-image1.png");
+     //auto codec = SkCodec::MakeFromStream(std::move(inputStream));
+     //auto imgInfo = codec->getInfo();
+     //SkBitmap bitmap;
+     //bitmap.allocPixels(imgInfo);
+     //codec->getPixels(imgInfo, bitmap.getPixels(), bitmap.rowBytes());
+     //auto surface = SkSurfaces::WrapPixels(bitmap.pixmap());
 
     auto imgInfo = SkImageInfo::MakeN32Premul(800, 600);
     auto surface = SkSurfaces::Raster(imgInfo);
-
     auto canvas = surface->getCanvas();
     SkPaint paint;
     // paint.setStroke(true);

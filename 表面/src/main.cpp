@@ -3,6 +3,7 @@
 #include "include/core/SkSurface.h"
 #include "include/core/SkCanvas.h"
 #include "include/core/SkPath.h"
+#include "include/core/SkBitmap.h"
 #include "include/pathops/SkPathOps.h"
 #include "include/utils/SkParsePath.h"
 #include "include/core/SkColorFilter.h"
@@ -18,24 +19,24 @@
 #include <vector>
 
 int w{400}, h{400};
-std::vector<SkColor> surfaceMemory(w* h, 0xffff00);
-//std::vector<std::uint8_t> surfaceMemory;
+std::vector<SkColor> surfaceMemory;
 
-void saveCanvas(SkCanvas *canvas)
+void drawPixels(SkSurface* surface)
 {
-    //SkPaint paint;
-    //paint.setColor(0xFF00FFFF);
-    //canvas->drawRect(SkRect::MakeLTRB(w - 120, h - 120, w - 20, h - 20), paint);
+    std::vector<SkColor> srcMem(200 * 200, 0xff00ffff);
+    SkBitmap dstBitmap;
+    dstBitmap.setInfo(SkImageInfo::MakeN32Premul(200, 200));
+    dstBitmap.setPixels(&srcMem.front());
+    surface->writePixels(dstBitmap, 100, 100);
 }
 
 void setPixel()
 {
-    //surfaceMemory.resize(w * h,0xffff00);
+    surfaceMemory.resize(w * h,0xff000000);
     SkImageInfo info = SkImageInfo::MakeN32Premul(w, h);
     auto size = sizeof(SkColor);
     auto surface = SkSurfaces::WrapPixels(info, &surfaceMemory.front(), w * 4);
-    auto canvas = surface->getCanvas();
-    saveCanvas(canvas);
+    drawPixels(surface.get());
 }
 
 void paint(const HWND hWnd)

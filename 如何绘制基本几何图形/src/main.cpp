@@ -120,7 +120,7 @@ void drawBezierPath(SkCanvas *canvas)
 
 void setPixel()
 {
-    surfaceMemory.resize(w * h);
+    surfaceMemory.resize(w * h, 0xff000000);
     SkImageInfo info = SkImageInfo::MakeN32Premul(w, h);
     auto canvas = SkCanvas::MakeRasterDirect(info, surfaceMemory.get(), 4 * w);
     drawCircle(canvas.get());

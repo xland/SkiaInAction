@@ -9,9 +9,12 @@ std::vector<SkColor> surfaceMemory;
 
 void setPixel()
 {
-    surfaceMemory.resize(w * h);
+    surfaceMemory.resize(w * h, 0xff000000);
     SkImageInfo info = SkImageInfo::MakeN32Premul(w, h);
     auto canvas = SkCanvas::MakeRasterDirect(info, &surfaceMemory.front(), 4 * w);
+
+    
+
     SkPaint paint;
     paint.setColor(SK_ColorRED);
     canvas->drawRect(SkRect::MakeLTRB(w - 150, h - 150, w - 10, h - 10), paint);
