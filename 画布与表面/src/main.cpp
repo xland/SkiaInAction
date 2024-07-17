@@ -14,6 +14,10 @@
 #include "include/core/SkMaskFilter.h"
 #include "include/core/SkBlurTypes.h"
 #include "include/core/SkBitmap.h"
+#include "include/core/SkPicture.h"
+#include "include/core/SkPictureRecorder.h"
+
+#include "src/base/SkRandom.h"
 
 #include <vector>
 
@@ -157,7 +161,7 @@ void drawEraser(SkCanvas* canvas)
     canvas->drawCircle(w / 2, h / 2, r, paint);
     paint.setBlendMode(SkBlendMode::kClear);
     canvas->drawRect(SkRect::MakeXYWH(w / 2 - 50, h / 2 - 50, 100, 100), paint);
-    canvas->restore();
+    canvas->restore();    
 }
 
 void surfaceWritePixels(SkSurface* surface)
@@ -167,6 +171,26 @@ void surfaceWritePixels(SkSurface* surface)
     dstBitmap.setInfo(SkImageInfo::MakeN32Premul(200, 200));
     dstBitmap.setPixels(&srcMem.front());
     surface->writePixels(dstBitmap, 100, 100);
+}
+
+void recordCanvas(SkCanvas* canvas) {
+    SkPictureRecorder recorder;
+    SkCanvas* canvasRecorder = recorder.beginRecording(w, h);
+    auto maxR = std::min(w / 2, h / 2);
+    SkRandom rnd;
+    SkPaint paint;
+    paint.setAntiAlias(true);
+    for (size_t i = 0; i < 16; i++)
+    {
+        auto r = rnd.nextRangeU(10, maxR);
+        auto x = rnd.nextRangeU(0 + r, w - r);
+        auto y = rnd.nextRangeU(0 + r, h - r);
+        auto color = rnd.nextRangeU(1, 0xFFFFFFFF);
+        paint.setColor(color);
+        canvasRecorder->drawCircle(SkPoint::Make(x, y), r, paint);
+    }
+    auto picture = recorder.finishRecordingAsPicture();
+    canvas->drawPicture(picture);
 }
 
 void setPixel()
@@ -180,9 +204,11 @@ void setPixel()
     //saveCanvas(canvas.get());
     // clipCanvas(canvas.get());
     // rotateCanvas(canvas.get());
-    drawEraser(canvas.get());
+    //drawEraser(canvas.get());
     //auto surface = SkSurfaces::WrapPixels(info, &surfaceMemory.front(), w * 4);
     //surfaceWritePixels(surface.get());
+
+    recordCanvas(canvas.get());
 }
 
 void paint(const HWND hWnd)
