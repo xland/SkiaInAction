@@ -16,7 +16,6 @@
 #include "include/core/SkBitmap.h"
 #include "include/core/SkPicture.h"
 #include "include/core/SkPictureRecorder.h"
-
 #include "src/base/SkRandom.h"
 
 #include <vector>
@@ -180,7 +179,7 @@ void recordCanvas(SkCanvas* canvas) {
     SkRandom rnd;
     SkPaint paint;
     paint.setAntiAlias(true);
-    for (size_t i = 0; i < 16; i++)
+    for (size_t i = 0; i < 2; i++)
     {
         auto r = rnd.nextRangeU(10, maxR);
         auto x = rnd.nextRangeU(0 + r, w - r);
