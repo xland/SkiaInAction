@@ -206,7 +206,12 @@ void setPixel()
     //drawEraser(canvas.get());
     //auto surface = SkSurfaces::WrapPixels(info, &surfaceMemory.front(), w * 4);
     //surfaceWritePixels(surface.get());
+    auto surface = canvas->makeSurface(info);
+    auto canvas2 = surface->getCanvas();
+    auto surface2 = canvas2->getSurface();
+    auto surface3 = canvas2->makeSurface(info);
 
+    surface->draw(canvas.get(), 0, 0);
     recordCanvas(canvas.get());
 }
 
