@@ -13,6 +13,7 @@
 #include "include/effects/SkGradientShader.h"
 #include "include/core/SkMaskFilter.h"
 #include "include/core/SkBlurTypes.h"
+#include "include/core/SkBitmap.h"
 
 #include <vector>
 
@@ -159,6 +160,15 @@ void drawEraser(SkCanvas* canvas)
     canvas->restore();
 }
 
+void surfaceWritePixels(SkSurface* surface)
+{
+    std::vector<SkColor> srcMem(200 * 200, 0xff00ffff);
+    SkBitmap dstBitmap;
+    dstBitmap.setInfo(SkImageInfo::MakeN32Premul(200, 200));
+    dstBitmap.setPixels(&srcMem.front());
+    surface->writePixels(dstBitmap, 100, 100);
+}
+
 void setPixel()
 {
     surfaceMemory.resize(w * h, 0xff000000);
@@ -171,6 +181,8 @@ void setPixel()
     // clipCanvas(canvas.get());
     // rotateCanvas(canvas.get());
     drawEraser(canvas.get());
+    //auto surface = SkSurfaces::WrapPixels(info, &surfaceMemory.front(), w * 4);
+    //surfaceWritePixels(surface.get());
 }
 
 void paint(const HWND hWnd)
