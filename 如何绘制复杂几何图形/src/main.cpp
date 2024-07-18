@@ -13,6 +13,8 @@
 #include "include/effects/SkGradientShader.h"
 #include "include/core/SkMaskFilter.h"
 #include "include/core/SkBlurTypes.h"
+#include "include/effects/SkImageFilters.h"
+#include "include/core/SkRRect.h"
 #include <vector>
 
 int w{400}, h{400};
@@ -67,43 +69,27 @@ void drawPathShadow(SkCanvas *canvas)
     SkShadowUtils::DrawShadow(canvas, path, zPlaneParams, lightPos, 80.f, 0xFF00FFFF, SK_ColorTRANSPARENT);
 }
 
-void shaderAndBlend(SkCanvas* canvas) {
-    auto r = std::max(w, h);
+void drawPathShadow2(SkCanvas* canvas) {
     SkPaint paint;
-    auto filter = SkMaskFilter::MakeBlur(SkBlurStyle::kNormal_SkBlurStyle, 8);
-    paint.setMaskFilter(filter);
-
-    // 定义第一个渐变的颜色和位置
-    SkColor colors1[] = { 0xFF00FFFF, SK_ColorTRANSPARENT };
-    SkScalar pos1[] = { 0.0f, 1.0f };
-    sk_sp<SkShader> shader1 = SkGradientShader::MakeRadial(
-        SkPoint::Make(100, 100), r*2, colors1, pos1, 2, SkTileMode::kClamp);
-
-    // 定义第二个渐变的颜色和位置
-    SkColor colors2[] = { 0xFFff00FF, SK_ColorTRANSPARENT };
-    SkScalar pos2[] = { 0.0f, 1.0f };
-    sk_sp<SkShader> shader2 = SkGradientShader::MakeRadial(
-        SkPoint::Make(300, 200), r*2, colors2, pos2, 2, SkTileMode::kClamp);
-
-    // 定义第三个渐变的颜色和位置
-    SkColor colors3[] = { 0xFFffFF00, SK_ColorTRANSPARENT };
-    SkScalar pos3[] = { 0.0f, 1.0f };
-    sk_sp<SkShader> shader3 = SkGradientShader::MakeRadial(
-        SkPoint::Make(100, 300), r*2, colors3, pos3, 2, SkTileMode::kClamp);
-
-    // 将第一个渐变应用到画笔并绘制
-    paint.setShader(shader1);
-    canvas->drawPaint(paint);
-
-    // 使用混合模式叠加第二个渐变
-    paint.setShader(shader2);
-    paint.setBlendMode(SkBlendMode::kHardLight);
-    canvas->drawPaint(paint);
-
-    // 使用混合模式叠加第三个渐变
-    paint.setShader(shader3);
-    paint.setBlendMode(SkBlendMode::kHardLight);
-    canvas->drawPaint(paint);
+    paint.setStroke(false);
+    paint.setColor(0xFF00FFFF);
+    sk_sp<SkImageFilter> dropShadowFilter = SkImageFilters::DropShadow(
+        0, 0, // 阴影偏移 (dx, dy)
+        18.0f, 18.0f, // 模糊半径 (sigmaX, sigmaY)
+        0xffffffff, // 阴影颜色
+        nullptr // 输入图像过滤器
+    );
+    paint.setImageFilter(dropShadowFilter); 
+    auto rect = SkRect::MakeXYWH(w / 2 - 100, h / 2 - 100, 200, 200);
+    SkVector radii[4]{
+        {16, 16},  // 矩形左上角圆角尺寸；
+        {16, 16},  // 矩形右上角圆角尺寸；
+        {16, 16},  // 矩形右下角圆角尺寸；
+        {16, 16}   // 矩形左下角圆角尺寸；
+    };
+    SkRRect rr;
+    rr.setRectRadii(rect, radii);
+    canvas->drawRRect(rr, paint);
 }
 
 void drawPixel(SkCanvas *canvas)
@@ -145,9 +131,9 @@ void paint(const HWND hWnd)
     // drawMultiPath(canvas.get());
     // drawPathEffect(canvas.get());
     // drawPathShadow(canvas.get());
+    drawPathShadow2(canvas.get());
     // drawBlur(canvas.get());
     // drawPixel(canvas.get());
-    shaderAndBlend(canvas.get());
 
     PAINTSTRUCT ps;
     auto dc = BeginPaint(hWnd, &ps);
