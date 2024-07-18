@@ -21,7 +21,6 @@
 #include <vector>
 
 int w{400}, h{400};
-std::vector<SkColor> surfaceMemory;
 
 void translateCanvas(SkCanvas *canvas)
 {
@@ -97,7 +96,7 @@ void clipCanvas(SkCanvas *canvas)
     canvas->save();
     auto rect = SkRect::MakeXYWH(0, 0, w / 2, h / 2);
     canvas->clipRect(rect);
-    
+
     SkPaint paint;
     paint.setAntiAlias(true);
     paint.setColor(0xff00ffff);
@@ -143,12 +142,12 @@ void drawPixel(SkCanvas *canvas)
     canvas->writePixels(info, &pixels.front(), w * 4, 0, 0);
 }
 
-void drawEraser(SkCanvas* canvas)
+void drawEraser(SkCanvas *canvas)
 {
     SkPaint paint;
     paint.setAntiAlias(true);
-    SkPoint pts[2]{ SkPoint::Make(0, 0), SkPoint::Make(w, h) };
-    SkColor colors[6]{ 0xFF00FFFF, 0xFFFF00FF, 0xFFFFFF00, 0xFF0000FF, 0xFF00FF00, 0xFFFF0000 };
+    SkPoint pts[2]{SkPoint::Make(0, 0), SkPoint::Make(w, h)};
+    SkColor colors[6]{0xFF00FFFF, 0xFFFF00FF, 0xFFFFFF00, 0xFF0000FF, 0xFF00FF00, 0xFFFF0000};
     auto shader = SkGradientShader::MakeLinear(pts, colors, nullptr, 6, SkTileMode::kClamp);
     paint.setShader(shader);
     canvas->drawPaint(paint);
@@ -160,10 +159,10 @@ void drawEraser(SkCanvas* canvas)
     canvas->drawCircle(w / 2, h / 2, r, paint);
     paint.setBlendMode(SkBlendMode::kClear);
     canvas->drawRect(SkRect::MakeXYWH(w / 2 - 50, h / 2 - 50, 100, 100), paint);
-    canvas->restore();    
+    canvas->restore();
 }
 
-void surfaceWritePixels(SkSurface* surface)
+void surfaceWritePixels(SkSurface *surface)
 {
     std::vector<SkColor> srcMem(200 * 200, 0xff00ffff);
     SkBitmap dstBitmap;
@@ -172,9 +171,10 @@ void surfaceWritePixels(SkSurface* surface)
     surface->writePixels(dstBitmap, 100, 100);
 }
 
-void recordCanvas(SkCanvas* canvas) {
+void recordCanvas(SkCanvas *canvas)
+{
     SkPictureRecorder recorder;
-    SkCanvas* canvasRecorder = recorder.beginRecording(w, h);
+    SkCanvas *canvasRecorder = recorder.beginRecording(w, h);
     auto maxR = std::min(w / 2, h / 2);
     SkRandom rnd;
     SkPaint paint;
@@ -192,39 +192,31 @@ void recordCanvas(SkCanvas* canvas) {
     canvas->drawPicture(picture);
 }
 
-void setPixel()
+void paint(const HWND hWnd)
 {
-    surfaceMemory.resize(w * h, 0xff000000);
+    if (w <= 0 || h <= 0)
+        return;
+    SkColor *surfaceMemory = new SkColor[w * h]{0xff000000};
     SkImageInfo info = SkImageInfo::MakeN32Premul(w, h);
-    auto canvas = SkCanvas::MakeRasterDirect(info, &surfaceMemory.front(), 4 * w);
+    auto canvas = SkCanvas::MakeRasterDirect(info, surfaceMemory, 4 * w);
     // drawPixel(canvas.get());
     // translateCanvas(canvas.get());
     // skewCanvas(canvas.get());
-    //saveCanvas(canvas.get());
+    // saveCanvas(canvas.get());
     // clipCanvas(canvas.get());
     // rotateCanvas(canvas.get());
-    //drawEraser(canvas.get());
-    //auto surface = SkSurfaces::WrapPixels(info, &surfaceMemory.front(), w * 4);
-    //surfaceWritePixels(surface.get());
-    auto surface = canvas->makeSurface(info);
-    auto canvas2 = surface->getCanvas();
-    auto surface2 = canvas2->getSurface();
-    auto surface3 = canvas2->makeSurface(info);
-
-    surface->draw(canvas.get(), 0, 0);
+    // drawEraser(canvas.get());
+    auto surface = SkSurfaces::WrapPixels(info, surfaceMemory, w * 4);
+    // surfaceWritePixels(surface.get());
     recordCanvas(canvas.get());
-}
 
-void paint(const HWND hWnd)
-{
     PAINTSTRUCT ps;
     auto dc = BeginPaint(hWnd, &ps);
-    BITMAPINFO info = {sizeof(BITMAPINFOHEADER), w, 0 - h, 1, 32, BI_RGB, h * 4 * w, 0, 0, 0, 0};
-    StretchDIBits(dc, 0, 0, w, h, 0, 0, w, h, &surfaceMemory.front(), &info, DIB_RGB_COLORS, SRCCOPY);
+    BITMAPINFO bmpInfo = {sizeof(BITMAPINFOHEADER), w, 0 - h, 1, 32, BI_RGB, h * 4 * w, 0, 0, 0, 0};
+    StretchDIBits(dc, 0, 0, w, h, 0, 0, w, h, surfaceMemory, &bmpInfo, DIB_RGB_COLORS, SRCCOPY);
     ReleaseDC(hWnd, dc);
     EndPaint(hWnd, &ps);
-    std::vector<SkColor> vec;
-    surfaceMemory.swap(vec);
+    delete[] surfaceMemory;
 }
 
 LRESULT CALLBACK wndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
@@ -235,10 +227,6 @@ LRESULT CALLBACK wndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
     {
         w = LOWORD(lParam);
         h = HIWORD(lParam);
-        if (wParam != SIZE_MINIMIZED)
-        {
-            setPixel();
-        }
         break;
     }
     case WM_PAINT:

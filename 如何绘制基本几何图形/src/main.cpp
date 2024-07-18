@@ -5,7 +5,6 @@
 #include "include/core/SkRRect.h"
 
 int w{800}, h{600};
-std::vector<SkColor> surfaceMemory;
 
 void drawCircle(SkCanvas *canvas)
 {
@@ -118,11 +117,13 @@ void drawBezierPath(SkCanvas *canvas)
     canvas->drawPath(path, paint);
 }
 
-void setPixel()
+void paint(const HWND hWnd)
 {
-    surfaceMemory.resize(w * h, 0xff000000);
+    if (w <= 0 || h <= 0)
+        return;
+    SkColor *surfaceMemory = new SkColor[w * h]{0xff000000};
     SkImageInfo info = SkImageInfo::MakeN32Premul(w, h);
-    auto canvas = SkCanvas::MakeRasterDirect(info, surfaceMemory.get(), 4 * w);
+    auto canvas = SkCanvas::MakeRasterDirect(info, surfaceMemory, 4 * w);
     drawCircle(canvas.get());
     // drawEllipse(canvas.get());
     // drawRRect(canvas.get());
@@ -131,18 +132,14 @@ void setPixel()
     // drawPoint(canvas.get());
     // drawPath(canvas.get());
     // drawBezierPath(canvas.get());
-}
 
-void paint(const HWND hWnd)
-{
     PAINTSTRUCT ps;
     auto dc = BeginPaint(hWnd, &ps);
-    BITMAPINFO info = {sizeof(BITMAPINFOHEADER), w, 0 - h, 1, 32, BI_RGB, h * 4 * w, 0, 0, 0, 0};
-    StretchDIBits(dc, 0, 0, w, h, 0, 0, w, h, surfaceMemory.get(), &info, DIB_RGB_COLORS, SRCCOPY);
+    BITMAPINFO bmpInfo = {sizeof(BITMAPINFOHEADER), w, 0 - h, 1, 32, BI_RGB, h * 4 * w, 0, 0, 0, 0};
+    StretchDIBits(dc, 0, 0, w, h, 0, 0, w, h, surfaceMemory, &bmpInfo, DIB_RGB_COLORS, SRCCOPY);
     ReleaseDC(hWnd, dc);
     EndPaint(hWnd, &ps);
-    std::vector<SkColor> vec;
-    surfaceMemory.swap(vec);
+    delete[] surfaceMemory;
 }
 
 LRESULT CALLBACK wndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
@@ -153,10 +150,6 @@ LRESULT CALLBACK wndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
     {
         w = LOWORD(lParam);
         h = HIWORD(lParam);
-        if (wParam != SIZE_MINIMIZED)
-        {
-            setPixel();
-        }
         break;
     }
     case WM_PAINT:

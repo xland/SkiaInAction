@@ -10,14 +10,12 @@
 #include "include/effects/SkDashPathEffect.h"
 #include "include/utils/SkShadowUtils.h"
 #include "include/core/SkPoint3.h"
-
+#include "include/effects/SkGradientShader.h"
 #include "include/core/SkMaskFilter.h"
 #include "include/core/SkBlurTypes.h"
-
 #include <vector>
 
 int w{400}, h{400};
-std::vector<SkColor> surfaceMemory;
 
 void drawMultiPath(SkCanvas *canvas)
 {
@@ -69,6 +67,45 @@ void drawPathShadow(SkCanvas *canvas)
     SkShadowUtils::DrawShadow(canvas, path, zPlaneParams, lightPos, 80.f, 0xFF00FFFF, SK_ColorTRANSPARENT);
 }
 
+void shaderAndBlend(SkCanvas* canvas) {
+    auto r = std::max(w, h);
+    SkPaint paint;
+    auto filter = SkMaskFilter::MakeBlur(SkBlurStyle::kNormal_SkBlurStyle, 8);
+    paint.setMaskFilter(filter);
+
+    // 定义第一个渐变的颜色和位置
+    SkColor colors1[] = { 0xFF00FFFF, SK_ColorTRANSPARENT };
+    SkScalar pos1[] = { 0.0f, 1.0f };
+    sk_sp<SkShader> shader1 = SkGradientShader::MakeRadial(
+        SkPoint::Make(100, 100), r*2, colors1, pos1, 2, SkTileMode::kClamp);
+
+    // 定义第二个渐变的颜色和位置
+    SkColor colors2[] = { 0xFFff00FF, SK_ColorTRANSPARENT };
+    SkScalar pos2[] = { 0.0f, 1.0f };
+    sk_sp<SkShader> shader2 = SkGradientShader::MakeRadial(
+        SkPoint::Make(300, 200), r*2, colors2, pos2, 2, SkTileMode::kClamp);
+
+    // 定义第三个渐变的颜色和位置
+    SkColor colors3[] = { 0xFFffFF00, SK_ColorTRANSPARENT };
+    SkScalar pos3[] = { 0.0f, 1.0f };
+    sk_sp<SkShader> shader3 = SkGradientShader::MakeRadial(
+        SkPoint::Make(100, 300), r*2, colors3, pos3, 2, SkTileMode::kClamp);
+
+    // 将第一个渐变应用到画笔并绘制
+    paint.setShader(shader1);
+    canvas->drawPaint(paint);
+
+    // 使用混合模式叠加第二个渐变
+    paint.setShader(shader2);
+    paint.setBlendMode(SkBlendMode::kHardLight);
+    canvas->drawPaint(paint);
+
+    // 使用混合模式叠加第三个渐变
+    paint.setShader(shader3);
+    paint.setBlendMode(SkBlendMode::kHardLight);
+    canvas->drawPaint(paint);
+}
+
 void drawPixel(SkCanvas *canvas)
 {
     SkImageInfo info = SkImageInfo::MakeN32Premul(w, h);
@@ -99,28 +136,27 @@ void drawPixel(SkCanvas *canvas)
     canvas->writePixels(info, &pixels.front(), w * 4, 0, 0);
 }
 
-void setPixel()
+void paint(const HWND hWnd)
 {
-    surfaceMemory.resize(w * h, 0xff000000);
+    if (w <= 0 || h <= 0) return;
+    SkColor* surfaceMemory = new SkColor[w * h]{ SK_ColorBLACK };
     SkImageInfo info = SkImageInfo::MakeN32Premul(w, h);
-    auto canvas = SkCanvas::MakeRasterDirect(info, &surfaceMemory.front(), 4 * w);
+    auto canvas = SkCanvas::MakeRasterDirect(info, surfaceMemory, 4 * w);
     // drawMultiPath(canvas.get());
     // drawPathEffect(canvas.get());
     // drawPathShadow(canvas.get());
     // drawBlur(canvas.get());
-    drawPixel(canvas.get());
-}
+    // drawPixel(canvas.get());
+    shaderAndBlend(canvas.get());
 
-void paint(const HWND hWnd)
-{
     PAINTSTRUCT ps;
     auto dc = BeginPaint(hWnd, &ps);
-    BITMAPINFO info = {sizeof(BITMAPINFOHEADER), w, 0 - h, 1, 32, BI_RGB, h * 4 * w, 0, 0, 0, 0};
-    StretchDIBits(dc, 0, 0, w, h, 0, 0, w, h, &surfaceMemory.front(), &info, DIB_RGB_COLORS, SRCCOPY);
+    BITMAPINFO bmpInfo = {sizeof(BITMAPINFOHEADER), w, 0 - h, 1, 32, BI_RGB, h * 4 * w, 0, 0, 0, 0};
+    StretchDIBits(dc, 0, 0, w, h, 0, 0, w, h, surfaceMemory, &bmpInfo, DIB_RGB_COLORS, SRCCOPY);
     ReleaseDC(hWnd, dc);
     EndPaint(hWnd, &ps);
-    std::vector<SkColor> vec;
-    surfaceMemory.swap(vec);
+
+    delete[] surfaceMemory;
 }
 
 LRESULT CALLBACK wndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
@@ -131,10 +167,6 @@ LRESULT CALLBACK wndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
     {
         w = LOWORD(lParam);
         h = HIWORD(lParam);
-        if (wParam != SIZE_MINIMIZED)
-        {
-            setPixel();
-        }
         break;
     }
     case WM_PAINT:

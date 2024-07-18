@@ -5,31 +5,25 @@
 #include <vector>
 
 int w{800}, h{600};
-std::vector<SkColor> surfaceMemory;
-
-void setPixel()
-{
-    surfaceMemory.resize(w * h, 0xff000000);
-    SkImageInfo info = SkImageInfo::MakeN32Premul(w, h);
-    auto canvas = SkCanvas::MakeRasterDirect(info, &surfaceMemory.front(), 4 * w);
-
-    
-
-    SkPaint paint;
-    paint.setColor(SK_ColorRED);
-    canvas->drawRect(SkRect::MakeLTRB(w - 150, h - 150, w - 10, h - 10), paint);
-}
 
 void paint(const HWND hWnd)
 {
+    if (w <= 0 || h <= 0)
+        return;
+    SkColor *surfaceMemory = new SkColor[w * h]{ SK_ColorBLACK };
+    SkImageInfo info = SkImageInfo::MakeN32Premul(w, h);
+    auto canvas = SkCanvas::MakeRasterDirect(info, surfaceMemory, 4 * w);
+    SkPaint paint;
+    paint.setColor(SK_ColorRED);
+    canvas->drawRect(SkRect::MakeLTRB(w - 150, h - 150, w - 10, h - 10), paint);
+
     PAINTSTRUCT ps;
     auto dc = BeginPaint(hWnd, &ps);
-    BITMAPINFO info = {sizeof(BITMAPINFOHEADER), w, 0 - h, 1, 32, BI_RGB, h * 4 * w, 0, 0, 0, 0};
-    StretchDIBits(dc, 0, 0, w, h, 0, 0, w, h, &surfaceMemory.front(), &info, DIB_RGB_COLORS, SRCCOPY);
+    BITMAPINFO bmpInfo = {sizeof(BITMAPINFOHEADER), w, 0 - h, 1, 32, BI_RGB, h * 4 * w, 0, 0, 0, 0};
+    StretchDIBits(dc, 0, 0, w, h, 0, 0, w, h, surfaceMemory, &bmpInfo, DIB_RGB_COLORS, SRCCOPY);
     ReleaseDC(hWnd, dc);
     EndPaint(hWnd, &ps);
-    std::vector<SkColor> vec;
-    surfaceMemory.swap(vec);
+    delete[] surfaceMemory;
 }
 
 LRESULT CALLBACK wndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
@@ -40,10 +34,6 @@ LRESULT CALLBACK wndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
     {
         w = LOWORD(lParam);
         h = HIWORD(lParam);
-        if (wParam != SIZE_MINIMIZED)
-        {
-            setPixel();
-        }
         break;
     }
     case WM_PAINT:

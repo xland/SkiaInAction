@@ -13,7 +13,6 @@
 #include <sstream>
 
 int w{500}, h{500};
-std::vector<SkColor> surfaceMemory;
 
 void drawLinearGradientColor(SkCanvas *canvas)
 {
@@ -107,31 +106,34 @@ void colorOverlay(SkCanvas *canvas)
     canvas->clear(result);
 }
 
-void formatColor() {
+void formatColor()
+{
     auto color = SkColor4f::FromColor(0x99887766);
-    int R{ (int)(color.fR * 255) },
-        G{ (int)(color.fG * 255) },
-        B{ (int)(color.fB * 255) },
-        A{ (int)(color.fA * 255) };
+    int R{(int)(color.fR * 255)},
+        G{(int)(color.fG * 255)},
+        B{(int)(color.fB * 255)},
+        A{(int)(color.fA * 255)};
     auto colorStr = std::format("RGBA: {},{},{},{}", R, G, B, A); // RGBA: 136,119,102,153
 
     std::stringstream ss;
-    ss << std::hex << ((R << 24) | (G << 16) | (B << 8) | A);;
+    ss << std::hex << ((R << 24) | (G << 16) | (B << 8) | A);
+    ;
     std::string hex = ss.str();
     std::transform(hex.begin(), hex.end(), hex.begin(), toupper);
-    colorStr = std::format("HEX: #{}", hex); //HEX: #88776699
+    colorStr = std::format("HEX: #{}", hex); // HEX: #88776699
 }
 
-void colorFilter(SkCanvas* canvas) {
+void colorFilter(SkCanvas *canvas)
+{
     SkPaint paint;
     auto x = w / 2;
     auto y = h / 2;
-    //绘制锥型渐变的代码
-    SkColor colors[6]{ 0xFF00FFFF, 0xFFFFFF66, 0xFFFF00FF, 0xFF66FFFF, 0xFFFFFF00, 0xFFFF66FF };
+    // 绘制锥型渐变的代码
+    SkColor colors[6]{0xFF00FFFF, 0xFFFFFF66, 0xFFFF00FF, 0xFF66FFFF, 0xFFFFFF00, 0xFFFF66FF};
     auto shader = SkGradientShader::MakeTwoPointConical(SkPoint::Make(x, y), y, SkPoint::Make(x, 60.0f), 20.0f,
-        colors, nullptr, 6, SkTileMode::kClamp);
+                                                        colors, nullptr, 6, SkTileMode::kClamp);
     paint.setShader(shader);
-    //颜色矩阵过滤
+    // 颜色矩阵过滤
     SkColorMatrix colorMatrix;
     colorMatrix.setSaturation(0);
     auto filter = SkColorFilters::Matrix(colorMatrix);
@@ -139,7 +141,7 @@ void colorFilter(SkCanvas* canvas) {
     canvas->drawPaint(paint);
 }
 
-void drawBlendMode(SkCanvas* canvas)
+void drawBlendMode(SkCanvas *canvas)
 {
     canvas->clear(0);
     SkPaint paint;
@@ -152,7 +154,7 @@ void drawBlendMode(SkCanvas* canvas)
     canvas->drawRect(rect2, paint);
 }
 
-void drawEraser(SkCanvas* canvas)
+void drawEraser(SkCanvas *canvas)
 {
     SkPaint paint;
     paint.setAntiAlias(true);
@@ -163,36 +165,32 @@ void drawEraser(SkCanvas* canvas)
     canvas->drawRect(SkRect::MakeXYWH(w / 2 - 50, h / 2 - 50, 100, 100), paint);
 }
 
-void setPixel()
-{
-    surfaceMemory.resize(w * h, 0xff000000);
-    sk_sp<SkColorSpace> srgbColorSpace = SkColorSpace::MakeSRGB();
-    sk_sp<SkColorSpace> linearSrgbColorSpace = SkColorSpace::MakeSRGBLinear();
-    SkImageInfo info = SkImageInfo::MakeN32Premul(w, h, linearSrgbColorSpace);
-    auto canvas = SkCanvas::MakeRasterDirect(info, &surfaceMemory.front(), 4 * w);
-    //drawLinearGradientColor(canvas.get());
-    //drawRadialGradientColor(canvas.get());
-    //drawConicalGradientColor(canvas.get());
-    //drawSweepGradientColor(canvas.get());
-    //drawNoiseColor(canvas.get());
-    //averageColor(canvas.get());
-    //colorOverlay(canvas.get());
-    //formatColor();
-    //colorFilter(canvas.get());
-    //drawBlendMode(canvas.get());
-    drawEraser(canvas.get());
-}
-
 void paint(const HWND hWnd)
 {
+    if (w <= 0 || h <= 0)
+        return;
+    SkColor *surfaceMemory = new SkColor[w * h]{0xff000000};
+    SkImageInfo info = SkImageInfo::MakeN32Premul(w, h);
+    auto canvas = SkCanvas::MakeRasterDirect(info, surfaceMemory, 4 * w);
+    // drawLinearGradientColor(canvas.get());
+    // drawRadialGradientColor(canvas.get());
+    // drawConicalGradientColor(canvas.get());
+    // drawSweepGradientColor(canvas.get());
+    // drawNoiseColor(canvas.get());
+    // averageColor(canvas.get());
+    // colorOverlay(canvas.get());
+    // formatColor();
+    // colorFilter(canvas.get());
+    // drawBlendMode(canvas.get());
+    drawEraser(canvas.get());
+
     PAINTSTRUCT ps;
     auto dc = BeginPaint(hWnd, &ps);
-    BITMAPINFO info = {sizeof(BITMAPINFOHEADER), w, 0 - h, 1, 32, BI_RGB, h * 4 * w, 0, 0, 0, 0};
-    StretchDIBits(dc, 0, 0, w, h, 0, 0, w, h, &surfaceMemory.front(), &info, DIB_RGB_COLORS, SRCCOPY);
+    BITMAPINFO bmpInfo = {sizeof(BITMAPINFOHEADER), w, 0 - h, 1, 32, BI_RGB, h * 4 * w, 0, 0, 0, 0};
+    StretchDIBits(dc, 0, 0, w, h, 0, 0, w, h, surfaceMemory, &bmpInfo, DIB_RGB_COLORS, SRCCOPY);
     ReleaseDC(hWnd, dc);
     EndPaint(hWnd, &ps);
-    std::vector<SkColor> vec;
-    surfaceMemory.swap(vec);
+    delete[] surfaceMemory;
 }
 
 LRESULT CALLBACK wndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
@@ -203,10 +201,6 @@ LRESULT CALLBACK wndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
     {
         w = LOWORD(lParam);
         h = HIWORD(lParam);
-        if (wParam != SIZE_MINIMIZED)
-        {
-            setPixel();
-        }
         break;
     }
     case WM_PAINT:
