@@ -73,6 +73,7 @@ void drawPathShadow2(SkCanvas* canvas) {
     SkPaint paint;
     paint.setStroke(false);
     paint.setColor(0xFF00FFFF);
+    paint.setAntiAlias(true);
     sk_sp<SkImageFilter> dropShadowFilter = SkImageFilters::DropShadow(
         0, 0, // 阴影偏移 (dx, dy)
         18.0f, 18.0f, // 模糊半径 (sigmaX, sigmaY)
