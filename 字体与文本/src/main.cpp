@@ -12,6 +12,8 @@
 #include "include/core/SkFont.h"
 #include "include/core/SkFontMetrics.h"
 
+#include "include/core/SkData.h"
+
 int w{400}, h{400}; 
 
 void drawText(SkCanvas *canvas)
@@ -81,6 +83,79 @@ void measureText(SkCanvas* canvas)
     canvas->drawSimpleText(text.c_str(), length, SkTextEncoding::kUTF16, x, y, font, paint);
 }
 
+std::string wideStrToStr(const std::wstring& wstr)
+{
+    const int count = WideCharToMultiByte(CP_UTF8, 0, wstr.c_str(), (int)wstr.length(), NULL, 0, NULL, NULL);
+    std::string str(count, 0);
+    WideCharToMultiByte(CP_UTF8, 0, wstr.c_str(), -1, &str[0], count, NULL, NULL);
+    return str;
+}
+
+void loadFontFile(SkCanvas* canvas) {
+    auto fontPath = L"D:\\project\\SkiaInAction\\字体与文本\\AlimamaDaoLiTi.ttf";
+    auto fontPathStr = wideStrToStr(fontPath);
+    auto data{ SkData::MakeFromFileName(fontPathStr.data())};
+    auto fontMgr = SkFontMgr_New_GDI();
+    auto typeFace = fontMgr->makeFromData(data);
+    SkFont font(typeFace,66);
+
+    std::wstring text{ L"天地玄黄，宇宙洪荒！" };
+    auto length = text.size() * sizeof(wchar_t);
+    SkPaint paint;
+    paint.setColor(0xFFFFFF00);
+    paint.setStroke(false);
+    canvas->drawSimpleText(text.c_str(), length, SkTextEncoding::kUTF16, 20, 120, font, paint);
+}
+
+void drawFontIcon(SkCanvas* canvas) {
+    auto fontPath = L"D:\\project\\SkiaInAction\\字体与文本\\fa-solid-900.ttf";
+    auto fontPathStr = wideStrToStr(fontPath);
+    auto data{ SkData::MakeFromFileName(fontPathStr.data()) };
+    auto fontMgr = SkFontMgr_New_GDI();
+    auto typeFace = fontMgr->makeFromData(data);
+    SkFont font(typeFace, 66);
+
+    
+    SkPaint paint;
+    paint.setColor(0xFFFFFF00);
+    paint.setStroke(false);
+
+    auto iconCode = (const char*)u8"\uf015";
+    canvas->drawString(iconCode, 20, 120, font, paint);
+
+    iconCode = (const char*)u8"\uf118";
+    canvas->drawString(iconCode, 120, 120, font, paint);
+
+    iconCode = (const char*)u8"\uf06b";
+    canvas->drawString(iconCode, 220, 120, font, paint);
+
+    iconCode = (const char*)u8"\uf21d";
+    canvas->drawString(iconCode, 320, 120, font, paint);
+
+    iconCode = (const char*)u8"\uf086";
+    canvas->drawString(iconCode, 420, 120, font, paint);
+
+    iconCode = (const char*)u8"\uf53f";
+    canvas->drawString(iconCode, 520, 120, font, paint);
+}
+
+void fontBorder(SkCanvas* canvas) {
+    auto fontPath = L"D:\\project\\SkiaInAction\\字体与文本\\AlimamaDaoLiTi.ttf";
+    auto fontPathStr = wideStrToStr(fontPath);
+    auto data{ SkData::MakeFromFileName(fontPathStr.data()) };
+    auto fontMgr = SkFontMgr_New_GDI();
+    auto typeFace = fontMgr->makeFromData(data);
+    SkFont font(typeFace, 86);
+    font.setEdging(SkFont::Edging::kSubpixelAntiAlias);
+    font.setSubpixel(true);
+    std::wstring text{ L"天地玄黄，宇宙洪荒！" };
+    auto length = text.size() * sizeof(wchar_t);
+    SkPaint paint;
+    paint.setColor(0xFFFFFF00);
+    paint.setStroke(true);
+    paint.setStrokeWidth(2);
+    canvas->drawSimpleText(text.c_str(), length, SkTextEncoding::kUTF16, 20, 120, font, paint);
+}
 
 void paint(const HWND hWnd)
 {
@@ -91,7 +166,10 @@ void paint(const HWND hWnd)
     auto canvas = SkCanvas::MakeRasterDirect(info, surfaceMemory, 4 * w);
     //drawText(canvas.get());
     //drawCJKText(canvas.get());
-    measureText(canvas.get());
+    //measureText(canvas.get());
+    //loadFontFile(canvas.get());
+    //drawFontIcon(canvas.get());
+    fontBorder(canvas.get());
 
 
     PAINTSTRUCT ps;
