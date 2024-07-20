@@ -11,7 +11,7 @@
 #include "include/ports/SkTypeface_win.h"
 #include "include/core/SkFont.h"
 #include "include/core/SkFontMetrics.h"
-
+#include "include/core/SkTextBlob.h"
 #include "include/core/SkData.h"
 
 int w{400}, h{400}; 
@@ -22,23 +22,15 @@ void drawText(SkCanvas *canvas)
     SkFontStyle fontStyle = SkFontStyle::Normal();
     auto typeFace = fontMgr->matchFamilyStyle("Microsoft YaHei", fontStyle);
     SkFont font(typeFace,56);
-
     SkPaint paint;
     paint.setColor(0xFF00FFFF);
 
     canvas->drawString("Hello World!", 20, 120, font, paint);
 }
 
-
 void drawCJKText(SkCanvas* canvas)
 {
     SkPaint paint;
-    //paint.setColor(0xFFFFFF00);
-    //paint.setStroke(true);
-    //paint.setStrokeWidth(1);
-    //canvas->drawLine(SkPoint::Make(20, 0), SkPoint::Make(20, h), paint);
-    //canvas->drawLine(SkPoint::Make(0, 120), SkPoint::Make(w, 120), paint);
-
     auto fontMgr = SkFontMgr_New_GDI();
     auto fontStyle = SkFontStyle::Normal();
     auto typeFace = fontMgr->matchFamilyStyle("Microsoft YaHei", fontStyle);
@@ -50,6 +42,53 @@ void drawCJKText(SkCanvas* canvas)
     paint.setColor(0xFF00FFFF);
     paint.setStroke(false);
     canvas->drawSimpleText(text.c_str(), length, SkTextEncoding::kUTF16, 20, 120, font, paint);
+}
+
+std::string wideStrToStr(const std::wstring& wstr)
+{
+    const int count = WideCharToMultiByte(CP_UTF8, 0, wstr.c_str(), (int)wstr.length(), NULL, 0, NULL, NULL);
+    std::string str(count, 0);
+    WideCharToMultiByte(CP_UTF8, 0, wstr.c_str(), -1, &str[0], count, NULL, NULL);
+    return str;
+}
+
+void drawCJKText2(SkCanvas* canvas)
+{
+    SkPaint paint;
+    auto fontMgr = SkFontMgr_New_GDI();
+    auto fontStyle = SkFontStyle::Normal();
+    auto typeFace = fontMgr->matchFamilyStyle("Microsoft YaHei", fontStyle);
+    SkFont font(typeFace, 56);
+
+    std::wstring wideStr{ L"你好，世界！" };
+    auto text = wideStrToStr(wideStr);
+
+    paint.setColor(0xFF00FFFF);
+    paint.setStroke(false);
+    canvas->drawString(text.c_str(), 20, 120, font, paint);
+    //canvas->drawSimpleText(text.c_str(), text.size(), SkTextEncoding::kUTF8, 20, 120, font, paint);
+}
+
+void textPosition(SkCanvas* canvas)
+{
+    SkPaint paint;
+    paint.setColor(0xFFFFFF00);
+    paint.setStroke(true);
+    paint.setStrokeWidth(1);
+    canvas->drawLine(SkPoint::Make(20, 0), SkPoint::Make(20, h), paint);
+    canvas->drawLine(SkPoint::Make(0, 120), SkPoint::Make(w, 120), paint);
+
+    auto fontMgr = SkFontMgr_New_GDI();
+    auto fontStyle = SkFontStyle::Normal();
+    auto typeFace = fontMgr->matchFamilyStyle("Microsoft YaHei", fontStyle);
+    SkFont font(typeFace, 56);
+
+    std::wstring wideStr{ L"你好，世界！" };
+    auto text = wideStrToStr(wideStr);
+
+    paint.setColor(0xFF00FFFF);
+    paint.setStroke(false);
+    canvas->drawString(text.c_str(), 20, 120, font, paint);
 }
 
 void measureText(SkCanvas* canvas)
@@ -83,13 +122,7 @@ void measureText(SkCanvas* canvas)
     canvas->drawSimpleText(text.c_str(), length, SkTextEncoding::kUTF16, x, y, font, paint);
 }
 
-std::string wideStrToStr(const std::wstring& wstr)
-{
-    const int count = WideCharToMultiByte(CP_UTF8, 0, wstr.c_str(), (int)wstr.length(), NULL, 0, NULL, NULL);
-    std::string str(count, 0);
-    WideCharToMultiByte(CP_UTF8, 0, wstr.c_str(), -1, &str[0], count, NULL, NULL);
-    return str;
-}
+
 
 void loadFontFile(SkCanvas* canvas) {
     auto fontPath = L"D:\\project\\SkiaInAction\\字体与文本\\AlimamaDaoLiTi.ttf";
@@ -98,7 +131,6 @@ void loadFontFile(SkCanvas* canvas) {
     auto fontMgr = SkFontMgr_New_GDI();
     auto typeFace = fontMgr->makeFromData(data);
     SkFont font(typeFace,66);
-
     std::wstring text{ L"天地玄黄，宇宙洪荒！" };
     auto length = text.size() * sizeof(wchar_t);
     SkPaint paint;
@@ -157,6 +189,34 @@ void fontBorder(SkCanvas* canvas) {
     canvas->drawSimpleText(text.c_str(), length, SkTextEncoding::kUTF16, 20, 120, font, paint);
 }
 
+void textBlob(SkCanvas* canvas) {  
+    auto fontPath = L"D:\\project\\SkiaInAction\\字体与文本\\AlimamaDaoLiTi.ttf";
+    auto fontPathStr = wideStrToStr(fontPath);
+    auto data{ SkData::MakeFromFileName(fontPathStr.data()) };
+    auto fontMgr = SkFontMgr_New_GDI();
+    auto typeFace = fontMgr->makeFromData(data);
+    SkFont daoli(typeFace, 66);
+
+    auto typeFace2 = fontMgr->matchFamilyStyle("Microsoft YaHei", SkFontStyle::Normal());
+    SkFont yahei(typeFace2, 66);
+
+    std::wstring str1 = L"天地玄黄，";
+    auto length1 = str1.size() * sizeof(wchar_t);
+    SkPaint paint;
+    paint.setColor(0xFFFFFF00);
+    sk_sp<SkTextBlob> blob1 =
+        SkTextBlob::MakeFromText(str1.data(),length1,daoli, SkTextEncoding::kUTF16);
+
+    std::wstring str11 = L"宇宙洪荒！";
+    auto str2 = wideStrToStr(str11);
+    sk_sp<SkTextBlob> blob2 =
+        SkTextBlob::MakeFromString(str2.data(), yahei, SkTextEncoding::kUTF8);
+
+    // 在画布上绘制 SkTextBlob
+    canvas->drawTextBlob(blob1, 20, 120, paint);
+    canvas->drawTextBlob(blob2, 20, 220, paint);
+}
+
 void paint(const HWND hWnd)
 {
     if (w <= 0 || h <= 0)
@@ -166,10 +226,13 @@ void paint(const HWND hWnd)
     auto canvas = SkCanvas::MakeRasterDirect(info, surfaceMemory, 4 * w);
     //drawText(canvas.get());
     //drawCJKText(canvas.get());
+    //drawCJKText2(canvas.get());
+    //textPosition(canvas.get());
     //measureText(canvas.get());
     //loadFontFile(canvas.get());
     //drawFontIcon(canvas.get());
-    fontBorder(canvas.get());
+    //fontBorder(canvas.get());
+    textBlob(canvas.get());
 
 
     PAINTSTRUCT ps;
