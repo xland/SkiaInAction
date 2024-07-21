@@ -22,32 +22,42 @@ std::string wideStrToStr(const std::wstring& wstr)
 sk_sp<SkImage> getImg() {
     std::wstring imgPath = L"D:\\project\\SkiaInAction\\图像处理\\original.png";
     auto pathStr = wideStrToStr(imgPath);
-    auto stream = SkFILEStream::Make(pathStr.data());
+    std::unique_ptr<SkFILEStream> stream = SkFILEStream::Make(pathStr.data());
     SkCodec::Result result;
-    auto codec = SkCodec::MakeFromStream(std::move(stream), &result);
+    std::unique_ptr<SkCodec> codec = SkCodec::MakeFromStream(std::move(stream), &result);
     if (result != SkCodec::kSuccess) {
         return nullptr;
     }
-    auto imgInfo = codec->getInfo();
+    SkImageInfo imgInfo = codec->getInfo();
     SkBitmap bitmap;
     bitmap.allocPixels(imgInfo);
     result = codec->getPixels(imgInfo, bitmap.getPixels(), bitmap.rowBytes());
     if (SkCodec::kSuccess != result) {
         return nullptr;
     }
+    bitmap.setImmutable();
     return bitmap.asImage();
 }
 
 sk_sp<SkImage> getImg2() {
     std::wstring imgPath = L"D:\\project\\SkiaInAction\\图像处理\\original.png";
     auto pathStr = wideStrToStr(imgPath);
-    auto data{ SkData::MakeFromFileName(pathStr.data()) };
+    sk_sp<SkData> data{ SkData::MakeFromFileName(pathStr.data()) };
     auto codec = SkCodec::MakeFromData(data);
     auto imgInfo = codec->getInfo();
     SkBitmap bitmap;
     bitmap.allocPixels(imgInfo);
     codec->getPixels(imgInfo, bitmap.getPixels(), bitmap.rowBytes());
+    bitmap.setImmutable();
     return bitmap.asImage();
+}
+
+sk_sp<SkImage> getImg3() {
+    std::wstring imgPath = L"D:\\project\\SkiaInAction\\图像处理\\original.png";
+    auto pathStr = wideStrToStr(imgPath);
+    sk_sp<SkData> data{ SkData::MakeFromFileName(pathStr.data()) };
+    auto img = SkImages::DeferredFromEncodedData(data);
+    return img;
 }
 
 void drawImage(SkCanvas *canvas)
@@ -55,7 +65,9 @@ void drawImage(SkCanvas *canvas)
     canvas->clear(0xFFFFFFFF);
     auto img = getImg();
     //auto img = getImg2();
+    //auto img = getImg3();
     canvas->drawImage(img, 0, 0);
+    
 }
 
 void drawImgRect(SkCanvas* canvas)
@@ -75,8 +87,8 @@ void paint(const HWND hWnd)
     SkColor *surfaceMemory = new SkColor[w * h]{0xff000000};
     SkImageInfo info = SkImageInfo::MakeN32Premul(w, h);
     auto canvas = SkCanvas::MakeRasterDirect(info, surfaceMemory, 4 * w);
-    //drawImage(canvas.get());
-    drawImgRect(canvas.get());
+    drawImage(canvas.get());
+    //drawImgRect(canvas.get());
 
     PAINTSTRUCT ps;
     auto dc = BeginPaint(hWnd, &ps);
