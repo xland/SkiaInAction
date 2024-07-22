@@ -9,6 +9,11 @@
 #include "include/core/SkBitmap.h"
 #include "include/codec/SkCodec.h"
 
+ #include "include/core/SkMaskFilter.h"
+ #include "include/core/SkBlurTypes.h"
+#include "include/core/SkColorFilter.h"
+#include "include/effects/SkImageFilters.h"
+
 int w{400}, h{400};
 
 std::string wideStrToStr(const std::wstring& wstr)
@@ -75,8 +80,61 @@ void drawImgRect(SkCanvas* canvas)
     canvas->clear(0xFFFFFFFF);
     auto img = getImg();
     auto rect = SkRect::MakeXYWH(0, 0, w, h);
-    SkSamplingOptions imgOption{ SkFilterMode::kLinear, SkMipmapMode::kLinear };
+    SkSamplingOptions imgOption{};
+    //SkSamplingOptions imgOption{ SkFilterMode::kLinear, SkMipmapMode::kLinear };
     canvas->drawImageRect(img, rect, imgOption);
+    //SkPaint paint;
+    //paint.setAntiAlias(true);
+    //canvas->drawImageRect(img, rect, imgOption,&paint);
+}
+
+void blurImg(SkCanvas* canvas) {
+    canvas->clear(0xFFFFFFFF);
+    auto img = getImg();
+    auto rect = SkRect::MakeXYWH(0, 0, w, h);
+    SkSamplingOptions imgOption{ SkFilterMode::kLinear, SkMipmapMode::kLinear };
+    SkPaint paint;
+    sk_sp<SkImageFilter> filter = SkImageFilters::Blur(8, 8, nullptr, {});
+    paint.setImageFilter(filter);
+    canvas->drawImageRect(img, rect, imgOption, &paint);
+}
+
+void imgBlendColor(SkCanvas* canvas) {
+    canvas->clear(0xFFFFFFFF);
+    auto img = getImg();
+    auto rect = SkRect::MakeXYWH(0, 0, w, h);
+    SkSamplingOptions imgOption{ SkFilterMode::kLinear, SkMipmapMode::kLinear };
+    SkPaint paint;
+    sk_sp<SkColorFilter> filter = SkColorFilters::Blend(0xff000000, SkBlendMode::kSrcATop);  //SkBlendMode::kXor
+    paint.setColorFilter(filter);
+    canvas->drawImageRect(img, rect, imgOption, &paint);
+}
+
+void imgColorFilter(SkCanvas* canvas) {
+    canvas->clear(0xFFFFFFFF);
+    auto img = getImg();
+    auto rect = SkRect::MakeXYWH(0, 0, w, h);
+    SkSamplingOptions imgOption{ SkFilterMode::kLinear, SkMipmapMode::kLinear };
+    SkPaint paint;
+    SkScalar colorMatrix[20] = {
+    0, 0, 1, 0, 0,
+    0, 1, 0, 0, 0,
+    1, 0, 0, 0, 0,
+    0, 0, 0, 1, 0 }; // mix G and A.
+    sk_sp<SkColorFilter> filter = SkColorFilters::Matrix(colorMatrix);
+    paint.setColorFilter(filter);
+    canvas->drawImageRect(img, rect, imgOption, &paint);
+}
+
+void imgHSLA(SkCanvas* canvas) {
+    canvas->clear(0xFFFFFFFF);
+    auto img = getImg();
+    auto rect = SkRect::MakeXYWH(0, 0, w, h);
+    SkSamplingOptions imgOption{ SkFilterMode::kLinear, SkMipmapMode::kLinear };
+    SkPaint paint;
+    //SkColorFilter* colorFilter = SkColorFilters::HSLAMatrix(hueShift, saturationScale, 1, 0);
+    //paint.setColorFilter(filter);
+    canvas->drawImageRect(img, rect, imgOption, &paint);
 }
 
 
@@ -87,8 +145,11 @@ void paint(const HWND hWnd)
     SkColor *surfaceMemory = new SkColor[w * h]{0xff000000};
     SkImageInfo info = SkImageInfo::MakeN32Premul(w, h);
     auto canvas = SkCanvas::MakeRasterDirect(info, surfaceMemory, 4 * w);
-    drawImage(canvas.get());
+    //drawImage(canvas.get());
     //drawImgRect(canvas.get());
+    blurImg(canvas.get());
+    //imgColorFilter(canvas.get());
+    //imgBlendColor(canvas.get());
 
     PAINTSTRUCT ps;
     auto dc = BeginPaint(hWnd, &ps);
