@@ -9,10 +9,19 @@
 #include "include/core/SkBitmap.h"
 #include "include/codec/SkCodec.h"
 
- #include "include/core/SkMaskFilter.h"
- #include "include/core/SkBlurTypes.h"
+#include "include/core/SkMaskFilter.h"
+#include "include/core/SkBlurTypes.h"
 #include "include/core/SkColorFilter.h"
 #include "include/effects/SkImageFilters.h"
+
+#include "include/encode/SkPngEncoder.h"
+#include "include/encode/SkJpegEncoder.h"
+#include "include/encode/SkWebpEncoder.h"
+
+
+#include "include/codec/SkPngDecoder.h"
+#include "include/codec/SkJpegDecoder.h"
+#include "include/codec/SkWebpDecoder.h"
 
 int w{400}, h{400};
 
@@ -48,8 +57,8 @@ sk_sp<SkImage> getImg2() {
     std::wstring imgPath = L"D:\\project\\SkiaInAction\\图像处理\\original.png";
     auto pathStr = wideStrToStr(imgPath);
     sk_sp<SkData> data{ SkData::MakeFromFileName(pathStr.data()) };
-    auto codec = SkCodec::MakeFromData(data);
-    auto imgInfo = codec->getInfo();
+    std::unique_ptr<SkCodec> codec = SkCodec::MakeFromData(data);
+    SkImageInfo imgInfo = codec->getInfo();
     SkBitmap bitmap;
     bitmap.allocPixels(imgInfo);
     codec->getPixels(imgInfo, bitmap.getPixels(), bitmap.rowBytes());
@@ -65,14 +74,68 @@ sk_sp<SkImage> getImg3() {
     return img;
 }
 
+sk_sp<SkImage> getImg4() {
+    //std::wstring imgPath = L"D:\\project\\SkiaInAction\\图像处理\\original.png";
+    //auto pathStr = wideStrToStr(imgPath);
+    //sk_sp<SkData> data{ SkData::MakeFromFileName(pathStr.data()) };
+    //std::vector<SkCodecs::Decoder> decoders;
+    //decoders.push_back(SkPngDecoder::Decoder());
+    //decoders.push_back(SkJpegDecoder::Decoder());
+    //decoders.push_back(SkWebpDecoder::Decoder());
+    //std::unique_ptr<SkCodec> codec = SkCodec::MakeFromData(data, decoders);
+
+    std::wstring imgPath = L"D:\\project\\SkiaInAction\\图像处理\\original.png";
+    auto pathStr = wideStrToStr(imgPath);
+    std::unique_ptr<SkFILEStream> stream = SkFILEStream::Make(pathStr.data());
+    SkCodec::Result result;
+    std::vector<SkCodecs::Decoder> decoders;
+    decoders.push_back(SkPngDecoder::Decoder());
+    decoders.push_back(SkJpegDecoder::Decoder());
+    decoders.push_back(SkWebpDecoder::Decoder());
+    std::unique_ptr<SkCodec> codec = SkCodec::MakeFromStream(std::move(stream), decoders,&result);
+
+    SkImageInfo imgInfo = codec->getInfo();
+    SkBitmap bitmap;
+    bitmap.allocPixels(imgInfo);
+    codec->getPixels(imgInfo, bitmap.getPixels(), bitmap.rowBytes());
+    bitmap.setImmutable();
+    return bitmap.asImage();
+}
+
+void encodeImg() {
+    std::wstring srcPath = L"D:\\project\\SkiaInAction\\图像处理\\original.png";
+    auto srcStr = wideStrToStr(srcPath);
+    sk_sp<SkData> data{ SkData::MakeFromFileName(srcStr.data()) };
+    auto codec = SkCodec::MakeFromData(data);
+    auto imgInfo = codec->getInfo();
+    SkColor* byteMem = new SkColor[imgInfo.width() * imgInfo.height()]();
+    SkPixmap pixmap(imgInfo, byteMem,imgInfo.minRowBytes());
+    codec->getPixels(pixmap);
+    
+    std::wstring targetPath = L"D:\\project\\SkiaInAction\\图像处理\\original.jpg";
+    auto targetStr = wideStrToStr(targetPath);
+    SkFILEWStream stream(targetStr.data());
+
+    SkJpegEncoder::Options options;
+    options.fQuality = 80; //90kb -> 36kb
+    SkJpegEncoder::Encode(&stream, pixmap, options);
+
+    //SkWebpEncoder::Options options;
+    //options.fQuality = 80;
+    //SkWebpEncoder::Encode(&stream, pixmap, options);
+
+    stream.flush();
+    delete[] byteMem;
+}
+
 void drawImage(SkCanvas *canvas)
 {
     canvas->clear(0xFFFFFFFF);
-    auto img = getImg();
+    //auto img = getImg();
     //auto img = getImg2();
-    //auto img = getImg3();
-    canvas->drawImage(img, 0, 0);
-    
+    auto img = getImg3();
+    //auto img = getImg4();
+    canvas->drawImage(img, 0, 0);    
 }
 
 void drawImgRect(SkCanvas* canvas)
@@ -145,9 +208,10 @@ void paint(const HWND hWnd)
     SkColor *surfaceMemory = new SkColor[w * h]{0xff000000};
     SkImageInfo info = SkImageInfo::MakeN32Premul(w, h);
     auto canvas = SkCanvas::MakeRasterDirect(info, surfaceMemory, 4 * w);
-    //drawImage(canvas.get());
+    drawImage(canvas.get());
+    //encodeImg();
     //drawImgRect(canvas.get());
-    blurImg(canvas.get());
+    //blurImg(canvas.get());
     //imgColorFilter(canvas.get());
     //imgBlendColor(canvas.get());
 
