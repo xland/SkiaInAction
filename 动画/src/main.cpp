@@ -18,13 +18,10 @@
 #include "include/encode/SkJpegEncoder.h"
 #include "include/encode/SkWebpEncoder.h"
 
-
-#include "include/codec/SkPngDecoder.h"
-#include "include/codec/SkJpegDecoder.h"
-#include "include/codec/SkWebpDecoder.h"
+#include <thread>
 
 int w{400}, h{400};
-
+HWND hwnd;
 std::string wideStrToStr(const std::wstring& wstr)
 {
     const int count = WideCharToMultiByte(CP_UTF8, 0, wstr.c_str(), (int)wstr.length(), NULL, 0, NULL, NULL);
@@ -33,56 +30,45 @@ std::string wideStrToStr(const std::wstring& wstr)
     return str;
 }
 
-sk_sp<SkImage> getImg() {
-    std::wstring imgPath = L"D:\\project\\SkiaInAction\\图像处理\\original.png";
-    auto pathStr = wideStrToStr(imgPath);
-    std::unique_ptr<SkFILEStream> stream = SkFILEStream::Make(pathStr.data());
-    SkCodec::Result result;
-    std::unique_ptr<SkCodec> codec = SkCodec::MakeFromStream(std::move(stream), &result);
-    if (result != SkCodec::kSuccess) {
-        return nullptr;
-    }
-    SkImageInfo imgInfo = codec->getInfo();
-    SkBitmap bitmap;
-    bitmap.allocPixels(imgInfo);
-    result = codec->getPixels(imgInfo, bitmap.getPixels(), bitmap.rowBytes());
-    if (SkCodec::kSuccess != result) {
-        return nullptr;
-    }
-    bitmap.setImmutable();
-    return bitmap.asImage();
-}
 
-sk_sp<SkImage> getImg2() {
-    std::wstring imgPath = L"D:\\project\\SkiaInAction\\图像处理\\original.png";
-    auto pathStr = wideStrToStr(imgPath);
-    sk_sp<SkData> data{ SkData::MakeFromFileName(pathStr.data()) };
-    std::unique_ptr<SkCodec> codec = SkCodec::MakeFromData(data);
-    SkImageInfo imgInfo = codec->getInfo();
-    SkBitmap bitmap;
-    bitmap.allocPixels(imgInfo);
-    codec->getPixels(imgInfo, bitmap.getPixels(), bitmap.rowBytes());
-    bitmap.setImmutable();
-    return bitmap.asImage();
-}
-
-sk_sp<SkImage> getImg3() {
-    std::wstring imgPath = L"D:\\project\\SkiaInAction\\图像处理\\original.png";
-    auto pathStr = wideStrToStr(imgPath);
-    sk_sp<SkData> data{ SkData::MakeFromFileName(pathStr.data()) };
-    auto img = SkImages::DeferredFromEncodedData(data);
-    return img;
-}
-
-
-void drawImage(SkCanvas *canvas)
+void animateGif(SkCanvas *canvas)
 {
     canvas->clear(0xFFFFFFFF);
-    //auto img = getImg();
-    //auto img = getImg2();
-    auto img = getImg3();
-    //auto img = getImg4();
-    canvas->drawImage(img, 0, 0);    
+    std::wstring imgPath = L"D:\\project\\SkiaInAction\\动画\\demo.gif";
+    auto pathStr = wideStrToStr(imgPath);
+    std::unique_ptr<SkFILEStream> stream = SkFILEStream::Make(pathStr.data());
+    std::unique_ptr<SkCodec> codec = SkCodec::MakeFromStream(std::move(stream));
+    auto imgInfo = codec->getInfo();
+    SkColor* frameMem = new SkColor[imgInfo.width() * imgInfo.height()]();
+    auto t = std::thread([&](std::unique_ptr<SkCodec> codec) {
+        auto frameCount = codec->getFrameCount();
+        auto frameInfo = codec->getFrameInfo();
+        auto imgInfo = codec->getInfo();
+        SkCodec::Options option;
+        option.fFrameIndex = 0;
+        option.fPriorFrame = -1;
+        while (true)
+        {
+            auto start = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count();
+            codec->getPixels(imgInfo, frameMem, imgInfo.minRowBytes(), &option);
+            canvas->writePixels(imgInfo, frameMem, imgInfo.width() * 4, 0, 0);
+            InvalidateRect(hwnd, nullptr, false);
+            auto end = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count();
+            auto span = frameInfo[option.fFrameIndex].fDuration - (end - start);
+            std::this_thread::sleep_for(std::chrono::milliseconds(span));
+            if (option.fFrameIndex == frameCount - 1)
+            {
+                option.fPriorFrame = -1;
+                option.fFrameIndex = 0;
+            }
+            else
+            {
+                option.fPriorFrame = option.fPriorFrame + 1;
+                option.fFrameIndex = option.fFrameIndex + 1;
+            }
+        }
+        }, std::move(codec));
+    t.detach();
 }
 
 void paint(const HWND hWnd)
@@ -92,12 +78,7 @@ void paint(const HWND hWnd)
     SkColor *surfaceMemory = new SkColor[w * h]{0xff000000};
     SkImageInfo info = SkImageInfo::MakeN32Premul(w, h);
     auto canvas = SkCanvas::MakeRasterDirect(info, surfaceMemory, 4 * w);
-    drawImage(canvas.get());
-    //encodeImg();
-    //drawImgRect(canvas.get());
-    //blurImg(canvas.get());
-    //imgColorFilter(canvas.get());
-    //imgBlendColor(canvas.get());
+    animateGif(canvas.get());
 
     PAINTSTRUCT ps;
     auto dc = BeginPaint(hWnd, &ps);
@@ -150,7 +131,7 @@ void initWindow()
     {
         return;
     }
-    auto hwnd = CreateWindow(clsName.c_str(), clsName.c_str(), WS_OVERLAPPEDWINDOW,
+    hwnd = CreateWindow(clsName.c_str(), clsName.c_str(), WS_OVERLAPPEDWINDOW,
                              CW_USEDEFAULT, CW_USEDEFAULT, w, h,
                              nullptr, nullptr, hinstance, nullptr);
     ShowWindow(hwnd, SW_SHOW);
