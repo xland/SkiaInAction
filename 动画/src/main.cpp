@@ -65,31 +65,44 @@ void animateGif()
 }
 
 void animateLottie() {
-
-    SkImageInfo info = SkImageInfo::MakeN32Premul(w, h);
-    auto canvas = SkCanvas::MakeRasterDirect(info, surfaceMemory, 4 * w);
-    std::wstring imgPath = L"D:\\project\\SkiaInAction\\动画\\demo.json";
-    auto pathStr = wideStrToStr(imgPath);
-    sk_sp<skottie::Animation> animation = skottie::Animation::MakeFromFile(pathStr.data());
-    SkRect rect = SkRect::MakeXYWH(0, 0, w, h);
-    SkScalar startTime = 0;
-    SkScalar duration = animation->duration()*1000;
-    for (; ; )
-    {
-        startTime += 16; // 假设每帧间隔约 16ms，可根据需要调整
-        if (startTime > duration) {
-            break;
+    auto t = std::thread([&]() {
+        SkImageInfo info = SkImageInfo::MakeN32Premul(w, h);
+        auto canvas = SkCanvas::MakeRasterDirect(info, surfaceMemory, 4 * w);
+        SkRect rect = SkRect::MakeXYWH(0, 0, w, h);
+        SkScalar startTime = 0;
+        std::wstring imgPath = L"D:\\project\\SkiaInAction\\动画\\demo.json";
+        auto pathStr = wideStrToStr(imgPath);
+        sk_sp<skottie::Animation> animation = skottie::Animation::MakeFromFile(pathStr.data());
+        SkScalar life = animation->duration() * 1000;
+        while (true)
+        {
+            canvas->clear(0xff000000);
+            animation->render(canvas.get(), &rect);
+            InvalidateRect(hwnd, nullptr, false);
+            auto duration = std::chrono::milliseconds(20);
+            std::this_thread::sleep_for(duration);
+            startTime += 20;
+            if (startTime > life) {
+                startTime = 0;
+            }
+            animation->seek(startTime);
         }
-        animation->seek(startTime);
-        animation->render(canvas.get(), &rect);
-    }
+    });
+    t.detach();
+    
 }
 
 void paint(const HWND hWnd)
 {
     if (w <= 0 || h <= 0)
         return;  
-    
+    //SkImageInfo info = SkImageInfo::MakeN32Premul(w, h);
+    //auto canvas = SkCanvas::MakeRasterDirect(info, surfaceMemory, 4 * w);
+    //if (frameBitmap) {
+    //    auto x = (w - frameBitmap->width()) / 2;
+    //    auto y = (h - frameBitmap->height()) / 2;
+    //    canvas->writePixels(*frameBitmap, x, y);
+    //}
     PAINTSTRUCT ps;
     auto dc = BeginPaint(hWnd, &ps);
     BITMAPINFO bmpInfo = {sizeof(BITMAPINFOHEADER), w, 0 - h, 1, 32, BI_RGB, h * 4 * w, 0, 0, 0, 0};
