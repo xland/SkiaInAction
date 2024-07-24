@@ -2,22 +2,14 @@
 #include <string>
 #include "include/core/SkSurface.h"
 #include "include/core/SkCanvas.h"
-#include "include/core/SkRRect.h"
-#include "include/core/SkPath.h"
 
 #include "include/core/SkStream.h"
 #include "include/core/SkBitmap.h"
 #include "include/codec/SkCodec.h"
 
-#include "include/core/SkMaskFilter.h"
-#include "include/core/SkBlurTypes.h"
-#include "include/core/SkColorFilter.h"
-#include "include/effects/SkImageFilters.h"
-
-#include "include/encode/SkPngEncoder.h"
-#include "include/encode/SkJpegEncoder.h"
-#include "include/encode/SkWebpEncoder.h"
 #include "include/codec/SkEncodedImageFormat.h"
+
+#include "modules/skottie/include/Skottie.h"
 #include <thread>
 
 
@@ -33,8 +25,6 @@ std::string wideStrToStr(const std::wstring& wstr)
     WideCharToMultiByte(CP_UTF8, 0, wstr.c_str(), -1, &str[0], count, NULL, NULL);
     return str;
 }
-
-
 void animateGif()
 {
     std::wstring imgPath = L"D:\\project\\SkiaInAction\\动画\\demo.gif";
@@ -74,17 +64,32 @@ void animateGif()
     t.detach();
 }
 
+void animateLottie() {
+
+    SkImageInfo info = SkImageInfo::MakeN32Premul(w, h);
+    auto canvas = SkCanvas::MakeRasterDirect(info, surfaceMemory, 4 * w);
+    std::wstring imgPath = L"D:\\project\\SkiaInAction\\动画\\demo.json";
+    auto pathStr = wideStrToStr(imgPath);
+    sk_sp<skottie::Animation> animation = skottie::Animation::MakeFromFile(pathStr.data());
+    SkRect rect = SkRect::MakeXYWH(0, 0, w, h);
+    SkScalar startTime = 0;
+    SkScalar duration = animation->duration()*1000;
+    for (; ; )
+    {
+        startTime += 16; // 假设每帧间隔约 16ms，可根据需要调整
+        if (startTime > duration) {
+            break;
+        }
+        animation->seek(startTime);
+        animation->render(canvas.get(), &rect);
+    }
+}
+
 void paint(const HWND hWnd)
 {
     if (w <= 0 || h <= 0)
         return;  
-    SkImageInfo info = SkImageInfo::MakeN32Premul(w, h);
-    auto canvas = SkCanvas::MakeRasterDirect(info, surfaceMemory, 4 * w);
-    if (frameBitmap) {
-        auto x = (w - frameBitmap->width()) / 2;
-        auto y = (h - frameBitmap->height()) / 2;
-        canvas->writePixels(*frameBitmap, x, y);
-    }
+    
     PAINTSTRUCT ps;
     auto dc = BeginPaint(hWnd, &ps);
     BITMAPINFO bmpInfo = {sizeof(BITMAPINFOHEADER), w, 0 - h, 1, 32, BI_RGB, h * 4 * w, 0, 0, 0, 0};
@@ -144,7 +149,8 @@ void initWindow()
                              nullptr, nullptr, hinstance, nullptr);
     ShowWindow(hwnd, SW_SHOW);
     surfaceMemory = new SkColor[w * h]{ 0xff000000 };
-    animateGif();
+    //animateGif();
+    animateLottie();
 }
 
 int APIENTRY wWinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _In_ LPTSTR lpCmdLine, _In_ int nCmdShow)
