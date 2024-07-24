@@ -17,7 +17,7 @@
 #include "include/encode/SkPngEncoder.h"
 #include "include/encode/SkJpegEncoder.h"
 #include "include/encode/SkWebpEncoder.h"
-
+#include "include/codec/SkEncodedImageFormat.h"
 #include <thread>
 
 
