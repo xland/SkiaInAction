@@ -20,8 +20,12 @@
 
 #include <thread>
 
+
 int w{400}, h{400};
 HWND hwnd;
+SkColor* surfaceMemory{nullptr};
+SkBitmap* frameBitmap;
+
 std::string wideStrToStr(const std::wstring& wstr)
 {
     const int count = WideCharToMultiByte(CP_UTF8, 0, wstr.c_str(), (int)wstr.length(), NULL, 0, NULL, NULL);
@@ -31,31 +35,30 @@ std::string wideStrToStr(const std::wstring& wstr)
 }
 
 
-void animateGif(SkCanvas *canvas)
+void animateGif()
 {
-    canvas->clear(0xFFFFFFFF);
     std::wstring imgPath = L"D:\\project\\SkiaInAction\\动画\\demo.gif";
     auto pathStr = wideStrToStr(imgPath);
     std::unique_ptr<SkFILEStream> stream = SkFILEStream::Make(pathStr.data());
     std::unique_ptr<SkCodec> codec = SkCodec::MakeFromStream(std::move(stream));
-    auto imgInfo = codec->getInfo();
-    SkColor* frameMem = new SkColor[imgInfo.width() * imgInfo.height()]();
-    auto t = std::thread([&](std::unique_ptr<SkCodec> codec) {
-        auto frameCount = codec->getFrameCount();
-        auto frameInfo = codec->getFrameInfo();
-        auto imgInfo = codec->getInfo();
+    frameBitmap = new SkBitmap();
+    auto t = std::thread([](std::unique_ptr<SkCodec> codec) {
+        auto imgInfo = codec->getInfo().makeColorType(kN32_SkColorType);
+        frameBitmap->allocN32Pixels(imgInfo.width(), imgInfo.height());
+        int frameCount = codec->getFrameCount();
+        std::vector<SkCodec::FrameInfo> frameInfo = codec->getFrameInfo();
         SkCodec::Options option;
         option.fFrameIndex = 0;
         option.fPriorFrame = -1;
         while (true)
         {
-            auto start = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count();
-            codec->getPixels(imgInfo, frameMem, imgInfo.minRowBytes(), &option);
-            canvas->writePixels(imgInfo, frameMem, imgInfo.width() * 4, 0, 0);
+            auto start = std::chrono::system_clock::now();
+            codec->getPixels(imgInfo, frameBitmap->getPixels(), imgInfo.minRowBytes(), &option);
             InvalidateRect(hwnd, nullptr, false);
-            auto end = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count();
-            auto span = frameInfo[option.fFrameIndex].fDuration - (end - start);
-            std::this_thread::sleep_for(std::chrono::milliseconds(span));
+            auto end = std::chrono::system_clock::now();
+            auto msCount = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
+            auto duration = std::chrono::milliseconds(frameInfo[option.fFrameIndex].fDuration - msCount);
+            std::this_thread::sleep_for(duration);
             if (option.fFrameIndex == frameCount - 1)
             {
                 option.fPriorFrame = -1;
@@ -74,19 +77,20 @@ void animateGif(SkCanvas *canvas)
 void paint(const HWND hWnd)
 {
     if (w <= 0 || h <= 0)
-        return;
-    SkColor *surfaceMemory = new SkColor[w * h]{0xff000000};
+        return;  
     SkImageInfo info = SkImageInfo::MakeN32Premul(w, h);
     auto canvas = SkCanvas::MakeRasterDirect(info, surfaceMemory, 4 * w);
-    animateGif(canvas.get());
-
+    if (frameBitmap) {
+        auto x = (w - frameBitmap->width()) / 2;
+        auto y = (h - frameBitmap->height()) / 2;
+        canvas->writePixels(*frameBitmap, x, y);
+    }
     PAINTSTRUCT ps;
     auto dc = BeginPaint(hWnd, &ps);
     BITMAPINFO bmpInfo = {sizeof(BITMAPINFOHEADER), w, 0 - h, 1, 32, BI_RGB, h * 4 * w, 0, 0, 0, 0};
     StretchDIBits(dc, 0, 0, w, h, 0, 0, w, h, surfaceMemory, &bmpInfo, DIB_RGB_COLORS, SRCCOPY);
     ReleaseDC(hWnd, dc);
     EndPaint(hWnd, &ps);
-    delete[] surfaceMemory;
 }
 
 LRESULT CALLBACK wndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
@@ -97,6 +101,10 @@ LRESULT CALLBACK wndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
     {
         w = LOWORD(lParam);
         h = HIWORD(lParam);
+        if (surfaceMemory) {
+            delete[] surfaceMemory;
+            surfaceMemory = new SkColor[w * h]{ 0xff000000 };
+        }
         break;
     }
     case WM_PAINT:
@@ -135,6 +143,8 @@ void initWindow()
                              CW_USEDEFAULT, CW_USEDEFAULT, w, h,
                              nullptr, nullptr, hinstance, nullptr);
     ShowWindow(hwnd, SW_SHOW);
+    surfaceMemory = new SkColor[w * h]{ 0xff000000 };
+    animateGif();
 }
 
 int APIENTRY wWinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _In_ LPTSTR lpCmdLine, _In_ int nCmdShow)
