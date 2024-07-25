@@ -43,7 +43,7 @@ SkCanvas* getCanvas() {
 
 void animateLottie() {
     auto t = std::thread([&]() {
-        std::wstring imgPath = L"D:\\project\\SkiaInAction\\动画Lottie\\demo4.json";
+        std::wstring imgPath = L"D:\\project\\SkiaInAction\\动画Lottie\\demo.json";
         auto pathStr = wideStrToStr(imgPath);
         sk_sp<skottie::Animation> animation = skottie::Animation::MakeFromFile(pathStr.data());
         auto size = animation->size();
@@ -53,9 +53,6 @@ void animateLottie() {
         auto frameIndex{ 0 };
         while (true)
         {
-            if (frameIndex > frameCount) {
-                frameIndex = 0;
-            }
             auto x = (w - size.fWidth) / 2;
             auto y = (h - size.fHeight) / 2;
             auto rect = SkRect::MakeXYWH(x, y, size.fWidth, size.fHeight);
@@ -68,6 +65,9 @@ void animateLottie() {
             InvalidateRect(hwnd, nullptr, false);
             std::this_thread::sleep_for(duration);
             frameIndex += 1;
+            if (frameIndex > frameCount) {
+                frameIndex = 0;
+            }
         }
     });
     t.detach();    
