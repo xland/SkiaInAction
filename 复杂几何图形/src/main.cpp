@@ -3,11 +3,9 @@
 #include "include/core/SkSurface.h"
 #include "include/core/SkCanvas.h"
 #include "include/core/SkPath.h"
-#include "include/pathops/SkPathOps.h"
+
 #include "include/utils/SkParsePath.h"
 #include "include/core/SkColorFilter.h"
-#include "include/effects/SkDiscretePathEffect.h"
-#include "include/effects/SkDashPathEffect.h"
 #include "include/utils/SkShadowUtils.h"
 #include "include/core/SkPoint3.h"
 #include "include/effects/SkGradientShader.h"
@@ -19,19 +17,6 @@
 
 int w{400}, h{400};
 
-void drawMultiPath(SkCanvas *canvas)
-{
-    SkPath path0;
-    path0.addRect(SkRect::MakeXYWH(100, 100, 100, 100));
-    SkPath path1;
-    path1.addRect(SkRect::MakeXYWH(150, 150, 100, 100));
-    SkPath path;
-    Op(path0, path1, SkPathOp::kXOR_SkPathOp, &path);
-    SkPaint paint;
-    paint.setColor(0xFF00FFFF);
-    canvas->drawPath(path, paint);
-}
-
 void drawBlur(SkCanvas *canvas)
 {
     SkPaint paint;
@@ -41,23 +26,6 @@ void drawBlur(SkCanvas *canvas)
     paint.setMaskFilter(filter);
     auto r = std::min(w / 2 - 60, h / 2 - 60);
     canvas->drawCircle(w / 2, h / 2, r, paint);
-}
-
-void drawPathEffect(SkCanvas *canvas)
-{
-    SkPaint paint;
-    paint.setColor(0xFF00FFFF);
-    paint.setStroke(true);
-    paint.setStrokeWidth(8);
-    paint.setStrokeCap(SkPaint::Cap::kRound_Cap);
-    paint.setStrokeJoin(SkPaint::kRound_Join);
-    paint.setAntiAlias(true);
-    // auto effect = SkDiscretePathEffect::Make(6, 8);
-    SkScalar kIntervals[] = {12, 16, 28, 18};
-    auto effect = SkDashPathEffect::Make(kIntervals, 4, 25);
-    paint.setPathEffect(effect);
-    auto rect = SkRect::MakeLTRB(60, 60, w - 60, h - 60);
-    canvas->drawRect(rect, paint);
 }
 
 void drawPathShadow(SkCanvas *canvas)
