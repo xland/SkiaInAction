@@ -2,20 +2,52 @@
 #include <string>
 #include "include/core/SkSurface.h"
 #include "include/core/SkCanvas.h"
-#include <vector>
+#include "include/core/SkRRect.h"
+#include "include/core/SkPath.h"
 
 int w{800}, h{600};
+
+void drawPath(SkCanvas *canvas)
+{
+    SkPaint paint;
+    paint.setAntiAlias(true);
+    paint.setColor(SK_ColorRED);
+    paint.setStroke(true);
+    paint.setStrokeWidth(16);
+    paint.setStrokeJoin(SkPaint::kRound_Join);
+    SkPath path;
+    path.moveTo(60, 120);
+    path.lineTo(180, 60);
+    path.lineTo(w - 60, 120);
+    path.lineTo(w - 160, h - 160);
+    path.lineTo(180, h - 60);
+    path.close();
+    canvas->drawPath(path, paint);
+}
+
+void drawBezierPath(SkCanvas *canvas)
+{
+    SkPaint paint;
+    paint.setAntiAlias(true);
+    paint.setColor(SK_ColorRED);
+    paint.setStroke(true);
+    paint.setStrokeCap(SkPaint::Cap::kRound_Cap);
+    paint.setStrokeWidth(6);
+    SkPath path;
+    path.moveTo(60, 60);
+    path.cubicTo(280, 60, w - 280, h - 60, w - 60, h - 60);
+    canvas->drawPath(path, paint);
+}
 
 void paint(const HWND hWnd)
 {
     if (w <= 0 || h <= 0)
         return;
-    SkColor *surfaceMemory = new SkColor[w * h]{ SK_ColorBLACK };
+    SkColor *surfaceMemory = new SkColor[w * h]{0xff000000};
     SkImageInfo info = SkImageInfo::MakeN32Premul(w, h);
     auto canvas = SkCanvas::MakeRasterDirect(info, surfaceMemory, 4 * w);
-    SkPaint paint;
-    paint.setColor(SK_ColorRED);
-    canvas->drawRect(SkRect::MakeLTRB(w - 150, h - 150, w - 10, h - 10), paint);
+     drawPath(canvas.get());
+    // drawBezierPath(canvas.get());
 
     PAINTSTRUCT ps;
     auto dc = BeginPaint(hWnd, &ps);

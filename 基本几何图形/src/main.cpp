@@ -4,8 +4,49 @@
 #include "include/core/SkCanvas.h"
 #include "include/core/SkRRect.h"
 #include "include/core/SkPath.h"
+#include "include/core/SkPoint.h"
 
 int w{800}, h{600};
+
+void drawRect(SkCanvas* canvas) {
+    SkPaint paint;
+    paint.setColor(SK_ColorRED);
+    paint.setStroke(true);
+    paint.setStrokeWidth(16);
+    SkRect rect = SkRect::MakeLTRB(w / 2 - 100, h / 2 - 100, w / 2 + 100, h / 2 + 100);
+    bool isPointInRect = rect.contains(w / 2, h / 2);
+    canvas->drawRect(rect, paint);
+}
+
+void drawPoint(SkCanvas* canvas)
+{
+    SkPaint paint;
+    paint.setColor(SK_ColorRED);
+    paint.setStrokeWidth(16);
+    canvas->drawPoint(w/2,h/2, paint);
+}
+
+void drawPoint2(SkCanvas* canvas)
+{
+    SkPaint paint;
+    paint.setColor(SK_ColorRED);
+    paint.setStrokeWidth(16);
+    SkPoint pts[]{ SkPoint::Make(60, 60),
+                  SkPoint::Make(w / 2, h / 2),
+                  SkPoint::Make(w - 60, h - 60) };
+    canvas->drawPoints(SkCanvas::PointMode::kPoints_PointMode, 3, pts, paint);
+}
+
+void drawLine(SkCanvas* canvas)
+{
+    SkPaint paint;
+    paint.setColor(SK_ColorRED);
+    paint.setAntiAlias(true);
+    paint.setStroke(true);
+    paint.setStrokeWidth(16);
+    paint.setStrokeCap(SkPaint::Cap::kRound_Cap);
+    canvas->drawLine(80, 80, w - 80, h - 80, paint);
+}
 
 void drawCircle(SkCanvas *canvas)
 {
@@ -46,17 +87,6 @@ void drawRRect(SkCanvas *canvas)
     canvas->drawRRect(rr, paint);
 }
 
-void drawLine(SkCanvas *canvas)
-{
-    SkPaint paint;
-    paint.setColor(SK_ColorRED);
-    paint.setAntiAlias(true);
-    paint.setStroke(true);
-    paint.setStrokeWidth(16);
-    paint.setStrokeCap(SkPaint::Cap::kRound_Cap);
-    canvas->drawLine(80, 80, w - 80, h - 80, paint);
-}
-
 void drawArc(SkCanvas *canvas)
 {
     SkPaint paint;
@@ -70,54 +100,6 @@ void drawArc(SkCanvas *canvas)
     canvas->drawArc(rect, 0, -90, false, paint);
 }
 
-void drawPoint(SkCanvas *canvas)
-{
-    SkPaint paint;
-    paint.setColor(SK_ColorRED);
-    paint.setAntiAlias(true);
-    paint.setStroke(true);
-    paint.setStrokeWidth(16);
-    paint.setStrokeCap(SkPaint::Cap::kRound_Cap);
-    // canvas->drawPoint(w/2,h/2, paint);
-
-    SkPoint pts[]{SkPoint::Make(60, 60),
-                  SkPoint::Make(w / 2, h / 2),
-                  SkPoint::Make(w - 60, h - 60)};
-    canvas->drawPoints(SkCanvas::PointMode::kPoints_PointMode, 3, pts, paint);
-}
-
-void drawPath(SkCanvas *canvas)
-{
-    SkPaint paint;
-    paint.setAntiAlias(true);
-    paint.setColor(SK_ColorRED);
-    paint.setStroke(true);
-    paint.setStrokeWidth(16);
-    paint.setStrokeJoin(SkPaint::kRound_Join);
-    SkPath path;
-    path.moveTo(60, 120);
-    path.lineTo(180, 60);
-    path.lineTo(w - 60, 120);
-    path.lineTo(w - 160, h - 160);
-    path.lineTo(180, h - 60);
-    path.close();
-    canvas->drawPath(path, paint);
-}
-
-void drawBezierPath(SkCanvas *canvas)
-{
-    SkPaint paint;
-    paint.setAntiAlias(true);
-    paint.setColor(SK_ColorRED);
-    paint.setStroke(true);
-    paint.setStrokeCap(SkPaint::Cap::kRound_Cap);
-    paint.setStrokeWidth(6);
-    SkPath path;
-    path.moveTo(60, 60);
-    path.cubicTo(280, 60, w - 280, h - 60, w - 60, h - 60);
-    canvas->drawPath(path, paint);
-}
-
 void paint(const HWND hWnd)
 {
     if (w <= 0 || h <= 0)
@@ -125,14 +107,14 @@ void paint(const HWND hWnd)
     SkColor *surfaceMemory = new SkColor[w * h]{0xff000000};
     SkImageInfo info = SkImageInfo::MakeN32Premul(w, h);
     auto canvas = SkCanvas::MakeRasterDirect(info, surfaceMemory, 4 * w);
-    drawCircle(canvas.get());
+    drawRect(canvas.get());
+     //drawPoint(canvas.get());
+    //drawPoint2(canvas.get());
+    // drawLine(canvas.get());
+    // drawCircle(canvas.get());
     // drawEllipse(canvas.get());
     // drawRRect(canvas.get());
-    // drawLine(canvas.get());
     // drawArc(canvas.get());
-    // drawPoint(canvas.get());
-    // drawPath(canvas.get());
-    // drawBezierPath(canvas.get());
 
     PAINTSTRUCT ps;
     auto dc = BeginPaint(hWnd, &ps);
