@@ -75,54 +75,6 @@ void drawNoiseColor(SkCanvas *canvas)
     canvas->drawPaint(paint);
 }
 
-void averageColor(SkCanvas *canvas)
-{
-    SkColor colorArr[6]{0xFF123456, 0xFF654321, 0xFF789ABC, 0xFFABC789, 0xFFDEF123, 0xFF123DEF};
-    SkColor4f averageColor{SkColors::kTransparent};
-    for (size_t i = 0; i < 6; i++)
-    {
-        auto tempColor = SkColor4f::FromColor(colorArr[i]);
-        averageColor.fA += tempColor.fA;
-        averageColor.fR += tempColor.fR;
-        averageColor.fG += tempColor.fG;
-        averageColor.fB += tempColor.fB;
-    }
-    averageColor.fR /= 6;
-    averageColor.fG /= 6;
-    averageColor.fB /= 6;
-    averageColor.fA /= 6;
-    auto color = averageColor.toSkColor();
-    canvas->clear(averageColor);
-}
-
-void colorOverlay(SkCanvas *canvas)
-{
-    SkBitmap bitmap;
-    bitmap.allocN32Pixels(1, 1);
-    SkCanvas tempCanvas(bitmap);
-    tempCanvas.drawColor(0x88DD3456);
-    tempCanvas.drawColor(0x88654321);
-    auto result = bitmap.getColor(0, 0);
-    canvas->clear(result);
-}
-
-void formatColor()
-{
-    auto color = SkColor4f::FromColor(0x99887766);
-    int R{(int)(color.fR * 255)},
-        G{(int)(color.fG * 255)},
-        B{(int)(color.fB * 255)},
-        A{(int)(color.fA * 255)};
-    auto colorStr = std::format("RGBA: {},{},{},{}", R, G, B, A); // RGBA: 136,119,102,153
-
-    std::stringstream ss;
-    ss << std::hex << ((R << 24) | (G << 16) | (B << 8) | A);
-    ;
-    std::string hex = ss.str();
-    std::transform(hex.begin(), hex.end(), hex.begin(), toupper);
-    colorStr = std::format("HEX: #{}", hex); // HEX: #88776699
-}
-
 void colorFilter(SkCanvas *canvas)
 {
     SkPaint paint;
@@ -141,30 +93,6 @@ void colorFilter(SkCanvas *canvas)
     canvas->drawPaint(paint);
 }
 
-void drawBlendMode(SkCanvas *canvas)
-{
-    canvas->clear(0);
-    SkPaint paint;
-    paint.setColor(0xFF00FFFF);
-    auto rect1 = SkRect::MakeLTRB(60, h / 2 - 30, w - 60, h / 2 + 30);
-    canvas->drawRect(rect1, paint);
-    paint.setColor(0xFFFFFF00);
-    paint.setBlendMode(SkBlendMode::kSrcOut);
-    auto rect2 = SkRect::MakeLTRB(w / 2 - 30, 60, w / 2 + 30, h - 60);
-    canvas->drawRect(rect2, paint);
-}
-
-void drawEraser(SkCanvas *canvas)
-{
-    SkPaint paint;
-    paint.setAntiAlias(true);
-    paint.setColor(0xFF00FFFF);
-    auto r = std::min(w / 2 - 60, h / 2 - 60);
-    canvas->drawCircle(w / 2, h / 2, r, paint);
-    paint.setBlendMode(SkBlendMode::kClear);
-    canvas->drawRect(SkRect::MakeXYWH(w / 2 - 50, h / 2 - 50, 100, 100), paint);
-}
-
 void paint(const HWND hWnd)
 {
     if (w <= 0 || h <= 0)
@@ -172,17 +100,12 @@ void paint(const HWND hWnd)
     SkColor *surfaceMemory = new SkColor[w * h]{0xff000000};
     SkImageInfo info = SkImageInfo::MakeN32Premul(w, h);
     auto canvas = SkCanvas::MakeRasterDirect(info, surfaceMemory, 4 * w);
-    // drawLinearGradientColor(canvas.get());
+     drawLinearGradientColor(canvas.get());
     // drawRadialGradientColor(canvas.get());
     // drawConicalGradientColor(canvas.get());
     // drawSweepGradientColor(canvas.get());
     // drawNoiseColor(canvas.get());
-    // averageColor(canvas.get());
-    // colorOverlay(canvas.get());
-    // formatColor();
     // colorFilter(canvas.get());
-    // drawBlendMode(canvas.get());
-    drawEraser(canvas.get());
 
     PAINTSTRUCT ps;
     auto dc = BeginPaint(hWnd, &ps);

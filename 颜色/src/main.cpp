@@ -14,67 +14,6 @@
 
 int w{500}, h{500};
 
-void drawLinearGradientColor(SkCanvas *canvas)
-{
-    SkPaint paint;
-    paint.setAntiAlias(true);
-    SkPoint pts[2]{SkPoint::Make(0, 0), SkPoint::Make(w, h)};
-    SkColor colors[6]{0xFF00FFFF, 0xFFFF00FF, 0xFFFFFF00, 0xFF0000FF, 0xFF00FF00, 0xFFFF0000};
-    auto shader = SkGradientShader::MakeLinear(pts, colors, nullptr, 6, SkTileMode::kClamp);
-    paint.setShader(shader);
-    canvas->drawPaint(paint);
-    // auto x = w / 2;
-    // auto y = h / 2;
-    // auto r = std::min(x - 60, y - 60);
-    // canvas->drawCircle(x, y, r, paint);
-}
-
-void drawRadialGradientColor(SkCanvas *canvas)
-{
-    SkPaint paint;
-    paint.setAntiAlias(true);
-    SkColor colors[6]{0xFF00FFFF, 0xFFFF00FF, 0xFFFFFF00, 0xFF0000FF, 0xFF00FF00, 0xFFFF0000};
-    auto x = w / 2;
-    auto y = h / 2;
-    auto r = std::min(x - 10, y - 10);
-    auto shader = SkGradientShader::MakeRadial(SkPoint::Make(x, y), r, colors, nullptr, 6, SkTileMode::kClamp);
-    paint.setShader(shader);
-    canvas->drawPaint(paint);
-}
-
-void drawConicalGradientColor(SkCanvas *canvas)
-{
-    SkPaint paint;
-    auto x = w / 2;
-    auto y = h / 2;
-    SkColor colors[6]{0xFF00FFFF, 0xFFFF00FF, 0xFFFFFF00, 0xFF0000FF, 0xFF00FF00, 0xFFFF0000};
-    auto shader = SkGradientShader::MakeTwoPointConical(SkPoint::Make(x, y), y, SkPoint::Make(x, 60.0f), 20.0f,
-                                                        colors, nullptr, 6, SkTileMode::kClamp);
-    paint.setShader(shader);
-    canvas->drawPaint(paint);
-}
-
-void drawSweepGradientColor(SkCanvas *canvas)
-{
-    SkPaint paint;
-    auto x = w / 2;
-    auto y = h / 2;
-    SkColor colors[7]{0xFF00FFFF, 0xFFFF00FF, 0xFFFFFF00, 0xFF0000FF, 0xFF00FF00, 0xFFFF0000, 0xFF00FFFF};
-    auto shader = SkGradientShader::MakeSweep(x, y, colors, nullptr, 7, 0, nullptr);
-    paint.setShader(shader);
-    canvas->drawPaint(paint);
-}
-
-void drawNoiseColor(SkCanvas *canvas)
-{
-    canvas->clear(SK_ColorWHITE);
-    SkPaint paint;
-    auto shader = SkShaders::MakeFractalNoise(0.1f, 0.1f, 6, 0.0f, nullptr);
-    // auto shader = SkShaders::MakeTurbulence(0.1f, 0.1f, 6, 0.0f, nullptr);
-    paint.setShader(shader);
-    canvas->drawPaint(paint);
-}
-
 void averageColor(SkCanvas *canvas)
 {
     SkColor colorArr[6]{0xFF123456, 0xFF654321, 0xFF789ABC, 0xFFABC789, 0xFFDEF123, 0xFF123DEF};
@@ -123,24 +62,6 @@ void formatColor()
     colorStr = std::format("HEX: #{}", hex); // HEX: #88776699
 }
 
-void colorFilter(SkCanvas *canvas)
-{
-    SkPaint paint;
-    auto x = w / 2;
-    auto y = h / 2;
-    // 绘制锥型渐变的代码
-    SkColor colors[6]{0xFF00FFFF, 0xFFFFFF66, 0xFFFF00FF, 0xFF66FFFF, 0xFFFFFF00, 0xFFFF66FF};
-    auto shader = SkGradientShader::MakeTwoPointConical(SkPoint::Make(x, y), y, SkPoint::Make(x, 60.0f), 20.0f,
-                                                        colors, nullptr, 6, SkTileMode::kClamp);
-    paint.setShader(shader);
-    // 颜色矩阵过滤
-    SkColorMatrix colorMatrix;
-    colorMatrix.setSaturation(0);
-    auto filter = SkColorFilters::Matrix(colorMatrix);
-    paint.setColorFilter(filter);
-    canvas->drawPaint(paint);
-}
-
 void drawBlendMode(SkCanvas *canvas)
 {
     canvas->clear(0);
@@ -172,17 +93,11 @@ void paint(const HWND hWnd)
     SkColor *surfaceMemory = new SkColor[w * h]{0xff000000};
     SkImageInfo info = SkImageInfo::MakeN32Premul(w, h);
     auto canvas = SkCanvas::MakeRasterDirect(info, surfaceMemory, 4 * w);
-    // drawLinearGradientColor(canvas.get());
-    // drawRadialGradientColor(canvas.get());
-    // drawConicalGradientColor(canvas.get());
-    // drawSweepGradientColor(canvas.get());
-    // drawNoiseColor(canvas.get());
-    // averageColor(canvas.get());
+     averageColor(canvas.get());
     // colorOverlay(canvas.get());
     // formatColor();
-    // colorFilter(canvas.get());
     // drawBlendMode(canvas.get());
-    drawEraser(canvas.get());
+    //drawEraser(canvas.get());
 
     PAINTSTRUCT ps;
     auto dc = BeginPaint(hWnd, &ps);
