@@ -81,21 +81,14 @@ void drawDashPath(SkCanvas* canvas)
 
 void drawPathMask(SkCanvas* canvas)
 {
+    canvas->clear(0xFF00ffff);
     SkPaint paint;
-    SkPoint pts[2]{ SkPoint::Make(0, 0), SkPoint::Make(w, h) };
-    SkColor colors[6]{ 0xFF00FFFF, 0xFFFF00FF, 0xFFFFFF00, 0xFF0000FF, 0xFF00FF00, 0xFFFF0000 };
-    sk_sp<SkShader> shader = SkGradientShader::MakeLinear(pts, colors, nullptr, 6, SkTileMode::kClamp);
-    paint.setShader(shader);
-    canvas->drawPaint(paint);
-    paint.setShader(nullptr);
     paint.setColor(0xAA000000);
     SkPath path;
     SkRect rect = SkRect::MakeLTRB(100, 100, w-100, h-100);
     path.addRect(rect);
     path.setFillType(SkPathFillType::kInverseEvenOdd);
-
-    //bool flag = path.contains(w / 2, h / 2);  false
-
+    //bool flag = path.contains(w / 2, h / 2);  ֵΪfalse
     canvas->drawPath(path, paint);
 }
 
