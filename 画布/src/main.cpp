@@ -25,7 +25,6 @@ void translateCanvas(SkCanvas *canvas)
     paint.setColor(0xffffff00);
     canvas->drawRect(rect, paint);
 }
-
 void rotateCanvas(SkCanvas *canvas)
 {
     auto rect = SkRect::MakeXYWH(w / 2 - 50, h / 2 - 100, 100, 200);
@@ -36,7 +35,6 @@ void rotateCanvas(SkCanvas *canvas)
     paint.setColor(0xffffff00);
     canvas->drawRect(rect, paint);
 }
-
 void skewCanvas(SkCanvas *canvas)
 {
     auto rect = SkRect::MakeXYWH(60, 60, 80, 80);
@@ -61,7 +59,6 @@ void skewCanvas(SkCanvas *canvas)
     rect = SkRect::MakeXYWH(0, 0, 80, 80);
     canvas->drawRect(rect, paint);
 }
-
 void saveCanvas(SkCanvas *canvas)
 {
     auto rect = SkRect::MakeXYWH(20, 20, 100, 100);
@@ -80,7 +77,6 @@ void saveCanvas(SkCanvas *canvas)
     canvas->drawRect(rect, paint);
     canvas->restore();
 }
-
 void clipCanvas(SkCanvas *canvas)
 {
     canvas->save();
@@ -101,8 +97,46 @@ void clipCanvas(SkCanvas *canvas)
     canvas->drawCircle(SkPoint::Make(w / 2, h / 2), r, paint);
     canvas->restore();
 }
+void drawEraser(SkCanvas *canvas)
+{
+    SkPaint paint;
+    paint.setAntiAlias(true);
+    SkPoint pts[2]{SkPoint::Make(0, 0), SkPoint::Make(w, h)};
+    SkColor colors[6]{0xFF00FFFF, 0xFFFF00FF, 0xFFFFFF00, 0xFF0000FF, 0xFF00FF00, 0xFFFF0000};
+    auto shader = SkGradientShader::MakeLinear(pts, colors, nullptr, 6, SkTileMode::kClamp);
+    paint.setShader(shader);
+    canvas->drawPaint(paint);
 
-void drawPixel(SkCanvas *canvas)
+    canvas->saveLayer(SkRect::MakeXYWH(0, 0, w, h), nullptr);
+    paint.setShader(nullptr);
+    paint.setColor(0xFF00FFFF);
+    auto r = std::min(w / 2 - 60, h / 2 - 60);
+    canvas->drawCircle(w / 2, h / 2, r, paint);
+    paint.setBlendMode(SkBlendMode::kClear);
+    canvas->drawRect(SkRect::MakeXYWH(w / 2 - 50, h / 2 - 50, 100, 100), paint);
+    canvas->restore();
+}
+void recordCanvas(SkCanvas *canvas)
+{
+    SkPictureRecorder recorder;
+    SkCanvas *canvasRecorder = recorder.beginRecording(w, h);
+    auto maxR = std::min(w / 2, h / 2);
+    SkRandom rnd;
+    SkPaint paint;
+    paint.setAntiAlias(true);
+    for (size_t i = 0; i < 2; i++)
+    {
+        auto r = rnd.nextRangeU(10, maxR);
+        auto x = rnd.nextRangeU(0 + r, w - r);
+        auto y = rnd.nextRangeU(0 + r, h - r);
+        auto color = rnd.nextRangeU(1, 0xFFFFFFFF);
+        paint.setColor(color);
+        canvasRecorder->drawCircle(SkPoint::Make(x, y), r, paint);
+    }
+    auto picture = recorder.finishRecordingAsPicture();
+    canvas->drawPicture(picture);
+}
+void drawPixel(SkCanvas* canvas)
 {
     SkImageInfo info = SkImageInfo::MakeN32Premul(w, h);
     std::vector<SkColor> pixels;
@@ -132,47 +166,6 @@ void drawPixel(SkCanvas *canvas)
     canvas->writePixels(info, &pixels.front(), w * 4, 0, 0);
 }
 
-void drawEraser(SkCanvas *canvas)
-{
-    SkPaint paint;
-    paint.setAntiAlias(true);
-    SkPoint pts[2]{SkPoint::Make(0, 0), SkPoint::Make(w, h)};
-    SkColor colors[6]{0xFF00FFFF, 0xFFFF00FF, 0xFFFFFF00, 0xFF0000FF, 0xFF00FF00, 0xFFFF0000};
-    auto shader = SkGradientShader::MakeLinear(pts, colors, nullptr, 6, SkTileMode::kClamp);
-    paint.setShader(shader);
-    canvas->drawPaint(paint);
-
-    canvas->saveLayer(SkRect::MakeXYWH(0, 0, w, h), nullptr);
-    paint.setShader(nullptr);
-    paint.setColor(0xFF00FFFF);
-    auto r = std::min(w / 2 - 60, h / 2 - 60);
-    canvas->drawCircle(w / 2, h / 2, r, paint);
-    paint.setBlendMode(SkBlendMode::kClear);
-    canvas->drawRect(SkRect::MakeXYWH(w / 2 - 50, h / 2 - 50, 100, 100), paint);
-    canvas->restore();
-}
-
-void recordCanvas(SkCanvas *canvas)
-{
-    SkPictureRecorder recorder;
-    SkCanvas *canvasRecorder = recorder.beginRecording(w, h);
-    auto maxR = std::min(w / 2, h / 2);
-    SkRandom rnd;
-    SkPaint paint;
-    paint.setAntiAlias(true);
-    for (size_t i = 0; i < 2; i++)
-    {
-        auto r = rnd.nextRangeU(10, maxR);
-        auto x = rnd.nextRangeU(0 + r, w - r);
-        auto y = rnd.nextRangeU(0 + r, h - r);
-        auto color = rnd.nextRangeU(1, 0xFFFFFFFF);
-        paint.setColor(color);
-        canvasRecorder->drawCircle(SkPoint::Make(x, y), r, paint);
-    }
-    auto picture = recorder.finishRecordingAsPicture();
-    canvas->drawPicture(picture);
-}
-
 void paint(const HWND hWnd)
 {
     if (w <= 0 || h <= 0)
@@ -181,12 +174,12 @@ void paint(const HWND hWnd)
     SkImageInfo info = SkImageInfo::MakeN32Premul(w, h);
     auto canvas = SkCanvas::MakeRasterDirect(info, surfaceMemory, 4 * w);
     translateCanvas(canvas.get());
+    // rotateCanvas(canvas.get());
     // skewCanvas(canvas.get());
     // saveCanvas(canvas.get());
     // clipCanvas(canvas.get());
-    // rotateCanvas(canvas.get());
     // drawEraser(canvas.get());
-    //recordCanvas(canvas.get());
+    // recordCanvas(canvas.get());
     // drawPixel(canvas.get());
 
     PAINTSTRUCT ps;
