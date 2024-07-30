@@ -2,7 +2,6 @@
 #include <string>
 #include "include/core/SkSurface.h"
 #include "include/core/SkCanvas.h"
-#include <vector>
 
 int w{800}, h{600};
 
@@ -10,7 +9,7 @@ void paint(const HWND hWnd)
 {
     if (w <= 0 || h <= 0)
         return;
-    SkColor *surfaceMemory = new SkColor[w * h]{ SK_ColorBLACK };
+    SkColor *surfaceMemory = new SkColor[w * h]{SK_ColorBLACK};
     SkImageInfo info = SkImageInfo::MakeN32Premul(w, h);
     auto canvas = SkCanvas::MakeRasterDirect(info, surfaceMemory, 4 * w);
     SkPaint paint;

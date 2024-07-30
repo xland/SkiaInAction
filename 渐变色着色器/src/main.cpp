@@ -23,27 +23,27 @@ void drawLinearGradientColor(SkCanvas *canvas)
     SkPoint pts[2]{SkPoint::Make(0, 0), SkPoint::Make(w, h)};
     SkColor colors[6]{0xFF00FFFF, 0xFFFF00FF, 0xFFFFFF00, 0xFF0000FF, 0xFF00FF00, 0xFFFF0000};
     auto shader = SkGradientShader::MakeLinear(pts, colors, nullptr, 6, SkTileMode::kClamp);
-    paint.setShader(shader);    
+    paint.setShader(shader);
     canvas->drawPaint(paint);
 
-    //用线性渐变色绘制圆形
-     //auto x = w / 2;
-     //auto y = h / 2;
-     //auto r = std::min(x - 60, y - 60);
-     //canvas->drawCircle(x, y, r, paint);
+    // 用线性渐变色绘制圆形
+    // auto x = w / 2;
+    // auto y = h / 2;
+    // auto r = std::min(x - 60, y - 60);
+    // canvas->drawCircle(x, y, r, paint);
 
-    //用线性渐变色绘制路径
-    //paint.setStroke(true);
-    //paint.setStrokeWidth(16);
-    //paint.setStrokeJoin(SkPaint::kRound_Join);
-    //SkPath path;
-    //path.moveTo(60, 120);
-    //path.lineTo(180, 60);
-    //path.lineTo(w - 60, 120);
-    //path.lineTo(w - 160, h - 160);
-    //path.lineTo(180, h - 60);
-    //path.close();
-    //canvas->drawPath(path, paint);
+    // 用线性渐变色绘制路径
+    // paint.setStroke(true);
+    // paint.setStrokeWidth(16);
+    // paint.setStrokeJoin(SkPaint::kRound_Join);
+    // SkPath path;
+    // path.moveTo(60, 120);
+    // path.lineTo(180, 60);
+    // path.lineTo(w - 60, 120);
+    // path.lineTo(w - 160, h - 160);
+    // path.lineTo(180, h - 60);
+    // path.close();
+    // canvas->drawPath(path, paint);
 }
 
 void drawRadialGradientColor(SkCanvas *canvas)
@@ -110,24 +110,25 @@ void colorFilter(SkCanvas *canvas)
     canvas->drawPaint(paint);
 }
 
-void drawCylinder(SkCanvas* canvas) {
+void drawCylinder(SkCanvas *canvas)
+{
 
-    int bodyW{ 160 }, top{60};
-    int x1{ w / 2 - bodyW / 2 }, x2{ w / 2 + bodyW / 2 };
+    int bodyW{160}, top{60};
+    int x1{w / 2 - bodyW / 2}, x2{w / 2 + bodyW / 2};
 
     SkPath path;
     SkRect rect;
     rect.setXYWH(x1, h - 80, bodyW, 40);
-    path.arcTo(rect, 0, 180,true);
-    path.lineTo(x1, top+20);
-    path.lineTo(x2, top+20);
+    path.arcTo(rect, 0, 180, true);
+    path.lineTo(x1, top + 20);
+    path.lineTo(x2, top + 20);
     path.close();
 
     SkPaint paint;
     paint.setAntiAlias(true);
 
-    SkPoint pts[2]{ SkPoint::Make(x1, top), SkPoint::Make(x2, top) };
-    SkColor colors[2]{ 0xFF287191, 0xFF85B5CB };
+    SkPoint pts[2]{SkPoint::Make(x1, top), SkPoint::Make(x2, top)};
+    SkColor colors[2]{0xFF287191, 0xFF85B5CB};
     sk_sp<SkShader> shader = SkGradientShader::MakeLinear(pts, colors, nullptr, 2, SkTileMode::kClamp);
     paint.setShader(shader);
     canvas->drawPath(path, paint);
@@ -142,24 +143,24 @@ void drawCylinder(SkCanvas* canvas) {
     canvas->drawOval(rect, paint);
 }
 
-void drawCone(SkCanvas* canvas) {
+void drawCone(SkCanvas *canvas)
+{
 
-    int bodyW{ 160 }, top{ 60 };
-    int x1{ w / 2 - bodyW / 2 }, x2{ w / 2 + bodyW / 2 };
+    int bodyW{160}, top{60};
+    int x1{w / 2 - bodyW / 2}, x2{w / 2 + bodyW / 2};
     SkPath path;
     SkRect rect;
     rect.setXYWH(x1, h - 80, bodyW, 40);
     path.arcTo(rect, 0, 180, true);
-    path.lineTo(x1+bodyW/2, top + 20);
+    path.lineTo(x1 + bodyW / 2, top + 20);
     path.close();
     SkPaint paint;
     paint.setAntiAlias(true);
-    SkColor colors[2]{ 0xFF00FF00, 0xFF000000 };
-    auto shader = SkGradientShader::MakeSweep(w/2, top + 20, colors, nullptr,2,SkTileMode::kClamp, 50.0, 130.0, 0,nullptr);
+    SkColor colors[2]{0xFF00FF00, 0xFF000000};
+    auto shader = SkGradientShader::MakeSweep(w / 2, top + 20, colors, nullptr, 2, SkTileMode::kClamp, 50.0, 130.0, 0, nullptr);
     paint.setShader(shader);
     canvas->drawPath(path, paint);
 }
-
 
 void paint(const HWND hWnd)
 {
@@ -168,15 +169,14 @@ void paint(const HWND hWnd)
     SkColor *surfaceMemory = new SkColor[w * h]{0xff000000};
     SkImageInfo info = SkImageInfo::MakeN32Premul(w, h);
     auto canvas = SkCanvas::MakeRasterDirect(info, surfaceMemory, 4 * w);
-    // drawLinearGradientColor(canvas.get());
+    drawLinearGradientColor(canvas.get());
     // drawRadialGradientColor(canvas.get());
     // drawConicalGradientColor(canvas.get());
     // drawSweepGradientColor(canvas.get());
     // drawCylinder(canvas.get());
-     drawCone(canvas.get());
+    //  drawCone(canvas.get());
     // drawNoiseColor(canvas.get());
     // colorFilter(canvas.get());
-
 
     PAINTSTRUCT ps;
     auto dc = BeginPaint(hWnd, &ps);

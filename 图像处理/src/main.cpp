@@ -23,6 +23,8 @@
 #include "include/codec/SkJpegDecoder.h"
 #include "include/codec/SkWebpDecoder.h"
 
+#include "src/base/SkBase64.h"
+
 int w{400}, h{400};
 
 std::string wideStrToStr(const std::wstring& wstr)
@@ -33,8 +35,35 @@ std::string wideStrToStr(const std::wstring& wstr)
     return str;
 }
 
+sk_sp<SkImage> getImgDeprecated() {
+    //std::wstring imgPath = L"D:\\project\\SkiaInAction\\图像处理\\original.png";
+    //auto pathStr = wideStrToStr(imgPath);
+    //sk_sp<SkData> data{ SkData::MakeFromFileName(pathStr.data()) };
+    //std::vector<SkCodecs::Decoder> decoders;
+    //decoders.push_back(SkPngDecoder::Decoder());
+    //decoders.push_back(SkJpegDecoder::Decoder());
+    //decoders.push_back(SkWebpDecoder::Decoder());
+    //std::unique_ptr<SkCodec> codec = SkCodec::MakeFromData(data, decoders);
 
-void encodeImg() {
+    std::wstring imgPath = L"D:\\project\\SkiaInAction\\图像处理\\original.png";
+    auto pathStr = wideStrToStr(imgPath);
+    std::unique_ptr<SkFILEStream> stream = SkFILEStream::Make(pathStr.data());
+    SkCodec::Result result;
+    std::vector<SkCodecs::Decoder> decoders;
+    decoders.push_back(SkPngDecoder::Decoder());
+    decoders.push_back(SkJpegDecoder::Decoder());
+    decoders.push_back(SkWebpDecoder::Decoder());
+    std::unique_ptr<SkCodec> codec = SkCodec::MakeFromStream(std::move(stream), decoders, &result);
+
+    SkImageInfo imgInfo = codec->getInfo();
+    SkBitmap bitmap;
+    bitmap.allocPixels(imgInfo);
+    codec->getPixels(imgInfo, bitmap.getPixels(), bitmap.rowBytes());
+    bitmap.setImmutable();
+    return bitmap.asImage();
+}
+
+void png2Jpg() {
     std::wstring srcPath = L"D:\\project\\SkiaInAction\\图像处理\\original.png";
     auto srcStr = wideStrToStr(srcPath);
     sk_sp<SkData> data{ SkData::MakeFromFileName(srcStr.data()) };
@@ -60,10 +89,21 @@ void encodeImg() {
     delete[] byteMem;
 }
 
+void png2Base64() {
+    std::wstring imgPath = L"D:\\project\\SkiaInAction\\图像处理\\original.png";
+    auto pathStr = wideStrToStr(imgPath);
+    sk_sp<SkData> pngData{ SkData::MakeFromFileName(pathStr.data()) };
+    size_t len = SkBase64::EncodedSize(pngData->size());
+    SkString result(len);
+    SkBase64::Encode(pngData->data(), pngData->size(), result.data());
+    result.prepend("data:image/png;base64,");
+    SkDebugf(result.data());
+}
+
 void drawImgRect(SkCanvas* canvas)
 {
     canvas->clear(0xFFFFFFFF);
-    auto img = getImg();
+    auto img = getImgDeprecated();
     auto rect = SkRect::MakeXYWH(0, 0, w, h);
     //SkSamplingOptions imgOption{};
     SkSamplingOptions imgOption{ SkFilterMode::kLinear, SkMipmapMode::kLinear };
@@ -71,55 +111,6 @@ void drawImgRect(SkCanvas* canvas)
     //SkPaint paint;
     //paint.setAntiAlias(true);
     //canvas->drawImageRect(img, rect, imgOption,&paint);
-}
-
-void blurImg(SkCanvas* canvas) {
-    canvas->clear(0xFFFFFFFF);
-    auto img = getImg();
-    auto rect = SkRect::MakeXYWH(0, 0, w, h);
-    SkSamplingOptions imgOption{ SkFilterMode::kLinear, SkMipmapMode::kLinear };
-    SkPaint paint;
-    sk_sp<SkImageFilter> filter = SkImageFilters::Blur(8, 8, nullptr, {});
-    paint.setImageFilter(filter);
-    canvas->drawImageRect(img, rect, imgOption, &paint);
-}
-
-void imgBlendColor(SkCanvas* canvas) {
-    canvas->clear(0xFFFFFFFF);
-    auto img = getImg();
-    auto rect = SkRect::MakeXYWH(0, 0, w, h);
-    SkSamplingOptions imgOption{ SkFilterMode::kLinear, SkMipmapMode::kLinear };
-    SkPaint paint;
-    sk_sp<SkColorFilter> filter = SkColorFilters::Blend(0xff000000, SkBlendMode::kSrcATop);  //SkBlendMode::kXor
-    paint.setColorFilter(filter);
-    canvas->drawImageRect(img, rect, imgOption, &paint);
-}
-
-void imgColorFilter(SkCanvas* canvas) {
-    canvas->clear(0xFFFFFFFF);
-    auto img = getImg();
-    auto rect = SkRect::MakeXYWH(0, 0, w, h);
-    SkSamplingOptions imgOption{ SkFilterMode::kLinear, SkMipmapMode::kLinear };
-    SkPaint paint;
-    SkScalar colorMatrix[20] = {
-    0, 0, 1, 0, 0,
-    0, 1, 0, 0, 0,
-    1, 0, 0, 0, 0,
-    0, 0, 0, 1, 0 }; // mix G and A.
-    sk_sp<SkColorFilter> filter = SkColorFilters::Matrix(colorMatrix);
-    paint.setColorFilter(filter);
-    canvas->drawImageRect(img, rect, imgOption, &paint);
-}
-
-void imgHSLA(SkCanvas* canvas) {
-    canvas->clear(0xFFFFFFFF);
-    auto img = getImg();
-    auto rect = SkRect::MakeXYWH(0, 0, w, h);
-    SkSamplingOptions imgOption{ SkFilterMode::kLinear, SkMipmapMode::kLinear };
-    SkPaint paint;
-    //SkColorFilter* colorFilter = SkColorFilters::HSLAMatrix(hueShift, saturationScale, 1, 0);
-    //paint.setColorFilter(filter);
-    canvas->drawImageRect(img, rect, imgOption, &paint);
 }
 
 
@@ -130,12 +121,9 @@ void paint(const HWND hWnd)
     SkColor *surfaceMemory = new SkColor[w * h]{0xff000000};
     SkImageInfo info = SkImageInfo::MakeN32Premul(w, h);
     auto canvas = SkCanvas::MakeRasterDirect(info, surfaceMemory, 4 * w);
-    drawImage(canvas.get());
-    //encodeImg();
+    //png2Jpg();
     //drawImgRect(canvas.get());
-    //blurImg(canvas.get());
-    //imgColorFilter(canvas.get());
-    //imgBlendColor(canvas.get());
+    png2Base64();
 
     PAINTSTRUCT ps;
     auto dc = BeginPaint(hWnd, &ps);

@@ -136,7 +136,7 @@ void recordCanvas(SkCanvas *canvas)
     auto picture = recorder.finishRecordingAsPicture();
     canvas->drawPicture(picture);
 }
-void drawPixel(SkCanvas* canvas)
+void drawPixel(SkCanvas *canvas)
 {
     SkImageInfo info = SkImageInfo::MakeN32Premul(w, h);
     std::vector<SkColor> pixels;
@@ -177,10 +177,10 @@ void paint(const HWND hWnd)
     // rotateCanvas(canvas.get());
     // skewCanvas(canvas.get());
     // saveCanvas(canvas.get());
-    // clipCanvas(canvas.get());
     // drawEraser(canvas.get());
-    // recordCanvas(canvas.get());
     // drawPixel(canvas.get());
+    // clipCanvas(canvas.get());
+    // recordCanvas(canvas.get());
 
     PAINTSTRUCT ps;
     auto dc = BeginPaint(hWnd, &ps);
