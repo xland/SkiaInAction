@@ -1,11 +1,4 @@
-/*
- * Copyright 2023 Google LLC
- *
- * Use of this source code is governed by a BSD-style license that can be
- * found in the LICENSE file.
- */
-#ifndef WindowContext_DEFINED
-#define WindowContext_DEFINED
+#pragma once
 
 #include "include/core/SkRefCnt.h"
 #include "include/core/SkSurfaceProps.h"
@@ -14,12 +7,6 @@
 
 class GrDirectContext;
 class SkSurface;
-#if defined(SK_GRAPHITE)
-namespace skgpu::graphite {
-class Context;
-class Recorder;
-}
-#endif
 
 namespace skwindow {
 
@@ -43,12 +30,6 @@ public:
     virtual void setDisplayParams(const DisplayParams& params) = 0;
 
     GrDirectContext* directContext() const { return fContext.get(); }
-#if defined(SK_GRAPHITE)
-    skgpu::graphite::Context* graphiteContext() const { return fGraphiteContext.get(); }
-    skgpu::graphite::Recorder* graphiteRecorder() const { return fGraphiteRecorder.get(); }
-    void snapRecordingAndSubmit();
-#endif
-
     int width() const { return fWidth; }
     int height() const { return fHeight; }
     SkISize dimensions() const { return {fWidth, fHeight}; }
@@ -61,11 +42,6 @@ protected:
     virtual void onSwapBuffers() = 0;
 
     sk_sp<GrDirectContext> fContext;
-#if defined(SK_GRAPHITE)
-    std::unique_ptr<skgpu::graphite::Context> fGraphiteContext;
-    std::unique_ptr<skgpu::graphite::Recorder> fGraphiteRecorder;
-#endif
-
     int               fWidth;
     int               fHeight;
     DisplayParams     fDisplayParams;
@@ -77,6 +53,4 @@ protected:
     int               fStencilBits = 0;
 };
 
-}  // namespace skwindow
-
-#endif
+}

@@ -3,16 +3,13 @@
 #include "include/core/SkColorSpace.h"
 #include "include/core/SkSurface.h"
 #include "include/core/SkCanvas.h"
-
+#include "include/gpu/GrDirectContext.h"
 #include "gl/DisplayParams.h"
 #include "gl/SkWGL.h"
 #include "gl/WindowContext.h"
 #include "gl/GLWindowContext.h"
 #include "gl/GLTestContext.h"
 #include "gl/WindowContextFactory_win.h"
-#include "include/gpu/GrDirectContext.h"
-
-#include <GL/gl.h>
 #include <vector>
 int w{400}, h{400};
 std::unique_ptr<skwindow::WindowContext> fWindowContext;
@@ -30,14 +27,13 @@ void paint(HWND hwnd)
     SkRect rect = SkRect::MakeXYWH(w - 200, h - 200, 180, 180);
     auto canvas = surface->getCanvas();
     SkPaint paint;
+    paint.setAntiAlias(true);
     paint.setColor(0xff00ffff);
-    canvas->drawRect(rect,paint);
-
+    canvas->drawOval(rect,paint);
     if (auto dContext = fWindowContext->directContext()) {
-        dContext->flushAndSubmit(surface.get(), GrSyncCpu::kNo);
+        dContext->flushAndSubmit(surface.get());
     }    
     fWindowContext->swapBuffers();
-
     EndPaint(hwnd, &ps);
 }
 
@@ -91,7 +87,7 @@ void initWindow()
                              CW_USEDEFAULT, CW_USEDEFAULT, w, h,
                              nullptr, nullptr, hinstance, nullptr);
     ShowWindow(hwnd, SW_SHOW);
-    fWindowContext = skwindow::MakeGLForWin(hwnd, skwindow::DisplayParams());
+    fWindowContext = skwindow::MakeGLForWin(hwnd);
 }
 
 int APIENTRY wWinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _In_ LPTSTR lpCmdLine, _In_ int nCmdShow)

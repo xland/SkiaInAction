@@ -130,7 +130,8 @@ void GLWindowContext_win::onSwapBuffers() {
 
 namespace skwindow {
 
-std::unique_ptr<WindowContext> MakeGLForWin(HWND wnd, const DisplayParams& params) {
+std::unique_ptr<WindowContext> MakeGLForWin(HWND wnd) {
+    auto params = skwindow::DisplayParams();
     std::unique_ptr<WindowContext> ctx(new GLWindowContext_win(wnd, params));
     if (!ctx->isValid()) {
         return nullptr;
