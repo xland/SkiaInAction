@@ -42,6 +42,9 @@ void drawCJKText(SkCanvas* canvas)
     paint.setColor(0xFF00FFFF);
     paint.setStroke(false);
     canvas->drawSimpleText(text.c_str(), length, SkTextEncoding::kUTF16, 20, 120, font, paint);
+
+    //std::u16string text2{ u"你好，世界" };
+    //canvas->drawSimpleText(text2.c_str(), text2.size()* sizeof(char16_t), SkTextEncoding::kUTF16, 20, 120, font, paint);
 }
 
 std::string wideStrToStr(const std::wstring& wstr)
@@ -225,14 +228,14 @@ void paint(const HWND hWnd)
     SkImageInfo info = SkImageInfo::MakeN32Premul(w, h);
     auto canvas = SkCanvas::MakeRasterDirect(info, surfaceMemory, 4 * w);
     //drawText(canvas.get());
-    //drawCJKText(canvas.get());
+    drawCJKText(canvas.get());
     //drawCJKText2(canvas.get());
     //textPosition(canvas.get());
     //measureText(canvas.get());
     //loadFontFile(canvas.get());
     //drawFontIcon(canvas.get());
     //fontBorder(canvas.get());
-    textBlob(canvas.get());
+    //textBlob(canvas.get());
 
 
     PAINTSTRUCT ps;

@@ -47,7 +47,7 @@ void drawMutiText(SkCanvas *canvas)
     skia::textlayout::TextStyle defaultStyle;
     defaultStyle.setFontFamilies({ SkString{"Microsoft YaHei"} });
     defaultStyle.setColor(0xff00ffff);
-    defaultStyle.setFontSize(18);
+    defaultStyle.setFontSize(68);
     builder->pushStyle(defaultStyle);
     builder->addText(text);
     builder->pop();
