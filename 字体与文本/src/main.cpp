@@ -28,25 +28,6 @@ void drawText(SkCanvas *canvas)
     canvas->drawString("Hello World!", 20, 120, font, paint);
 }
 
-void drawCJKText(SkCanvas* canvas)
-{
-    SkPaint paint;
-    auto fontMgr = SkFontMgr_New_GDI();
-    auto fontStyle = SkFontStyle::Normal();
-    auto typeFace = fontMgr->matchFamilyStyle("Microsoft YaHei", fontStyle);
-    SkFont font(typeFace, 56);
-
-    std::wstring text{ L"你好，世界！" };
-    auto length = text.size() * sizeof(wchar_t);
-
-    paint.setColor(0xFF00FFFF);
-    paint.setStroke(false);
-    canvas->drawSimpleText(text.c_str(), length, SkTextEncoding::kUTF16, 20, 120, font, paint);
-
-    //std::u16string text2{ u"你好，世界" };
-    //canvas->drawSimpleText(text2.c_str(), text2.size()* sizeof(char16_t), SkTextEncoding::kUTF16, 20, 120, font, paint);
-}
-
 std::string wideStrToStr(const std::wstring& wstr)
 {
     const int count = WideCharToMultiByte(CP_UTF8, 0, wstr.c_str(), (int)wstr.length(), NULL, 0, NULL, NULL);
@@ -55,21 +36,27 @@ std::string wideStrToStr(const std::wstring& wstr)
     return str;
 }
 
-void drawCJKText2(SkCanvas* canvas)
+void drawCJKText(SkCanvas* canvas)
 {
     SkPaint paint;
+    paint.setColor(0xFF00FFFF);
+    paint.setStroke(false);
     auto fontMgr = SkFontMgr_New_GDI();
     auto fontStyle = SkFontStyle::Normal();
     auto typeFace = fontMgr->matchFamilyStyle("Microsoft YaHei", fontStyle);
-    SkFont font(typeFace, 56);
+    SkFont font(typeFace, 38);
 
-    std::wstring wideStr{ L"你好，世界！" };
-    auto text = wideStrToStr(wideStr);
+    std::wstring text1{ L"你好，世界！" };
+    auto length = text1.size() * sizeof(wchar_t);    
+    canvas->drawSimpleText(text1.c_str(), length, SkTextEncoding::kUTF16, 20, 120, font, paint);
 
-    paint.setColor(0xFF00FFFF);
-    paint.setStroke(false);
-    canvas->drawString(text.c_str(), 20, 120, font, paint);
-    //canvas->drawSimpleText(text.c_str(), text.size(), SkTextEncoding::kUTF8, 20, 120, font, paint);
+    auto text2 = wideStrToStr(text1);
+    canvas->drawString(text2.c_str(), 20, 240, font, paint);
+    //canvas->drawSimpleText(text.c_str(), text.size(), SkTextEncoding::kUTF8, 20, 240, font, paint);
+
+    std::u16string text3{ u"你好，世界！" };
+    length = text3.size() * sizeof(char16_t);
+    canvas->drawSimpleText(text3.c_str(), length, SkTextEncoding::kUTF16, 20, 180, font, paint);
 }
 
 void textPosition(SkCanvas* canvas)
@@ -229,7 +216,6 @@ void paint(const HWND hWnd)
     auto canvas = SkCanvas::MakeRasterDirect(info, surfaceMemory, 4 * w);
     //drawText(canvas.get());
     drawCJKText(canvas.get());
-    //drawCJKText2(canvas.get());
     //textPosition(canvas.get());
     //measureText(canvas.get());
     //loadFontFile(canvas.get());

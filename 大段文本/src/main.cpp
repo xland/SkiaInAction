@@ -18,25 +18,14 @@
 
 int w{800}, h{800};
 
-std::string wideStrToStr(const std::wstring& wstr)
-{
-    const int count = WideCharToMultiByte(CP_UTF8, 0, wstr.c_str(), (int)wstr.length(), NULL, 0, NULL, NULL);
-    std::string str(count, 0);
-    WideCharToMultiByte(CP_UTF8, 0, wstr.c_str(), -1, &str[0], count, NULL, NULL);
-    return str;
-}
-
 void drawMutiText(SkCanvas *canvas)
 {
-    std::u16string text(uR"(春江潮水连海平，海上明月共潮生。滟滟随波千万里，何处春江无月明！
-江流宛转绕芳甸，月照花林皆似霰。空里流霜不觉飞，汀上白沙看不见。
-江天一色无纤尘，皎皎空中孤月轮。江畔何人初见月？江月何年初照人？
-人生代代无穷已，江月年年望相似。不知江月待何人，但见长江送流水。
-白云一片去悠悠，青枫浦上不胜愁。谁家今夜扁舟子？何处相思明月楼？
-可怜楼上月裴回，应照离人妆镜台。玉户帘中卷不去，捣衣砧上拂还来。
-此时相望不相闻，愿逐月华流照君。鸿雁长飞光不度，鱼龙潜跃水成文。
-昨夜闲潭梦落花，可怜春半不还家。江水流春去欲尽，江潭落月复西斜。
-斜月沉沉藏海雾，碣石潇湘无限路。不知乘月几人归，落月摇情满江树)");
+    std::u16string text(uR"(醉里挑灯看剑，梦回吹角连营。
+八百里分麾下炙，五十弦翻塞外声。
+沙场秋点兵。
+马作的卢飞快，弓如霹雳弦惊。
+了却君王天下事，赢得生前身后名。
+可怜白发生！)");
 
     sk_sp<skia::textlayout::FontCollection> fontCollection = sk_make_sp<skia::textlayout::FontCollection>();
     auto fontMgr = SkFontMgr_New_GDI();
@@ -47,52 +36,13 @@ void drawMutiText(SkCanvas *canvas)
     skia::textlayout::TextStyle defaultStyle;
     defaultStyle.setFontFamilies({ SkString{"Microsoft YaHei"} });
     defaultStyle.setColor(0xff00ffff);
-    defaultStyle.setFontSize(68);
+    defaultStyle.setFontSize(38);
     builder->pushStyle(defaultStyle);
     builder->addText(text);
     builder->pop();
     auto paragraph = builder->Build();
     paragraph->layout(w);
-    paragraph->paint(canvas, 0, 0);
-
-    return;
-
-
-
-
-    /*std::u16string text(uR"(春江潮水连海平，海上明月共潮生。滟滟随波千万里，何处春江无月明！
-江流宛转绕芳甸，月照花林皆似霰。空里流霜不觉飞，汀上白沙看不见。
-江天一色无纤尘，皎皎空中孤月轮。江畔何人初见月？江月何年初照人？
-人生代代无穷已，江月年年望相似。不知江月待何人，但见长江送流水。
-白云一片去悠悠，青枫浦上不胜愁。谁家今夜扁舟子？何处相思明月楼？
-可怜楼上月裴回，应照离人妆镜台。玉户帘中卷不去，捣衣砧上拂还来。
-此时相望不相闻，愿逐月华流照君。鸿雁长飞光不度，鱼龙潜跃水成文。
-昨夜闲潭梦落花，可怜春半不还家。江水流春去欲尽，江潭落月复西斜。
-斜月沉沉藏海雾，碣石潇湘无限路。不知乘月几人归，落月摇情满江树)");
-    auto fontCollection = sk_make_sp<skia::textlayout::FontCollection>();
-    auto fontMgr = SkFontMgr_New_GDI();
-    fontCollection->setDefaultFontManager(fontMgr);
-    SkPaint paint;
-    paint.setAntiAlias(true);
-    paint.setColor(SK_ColorBLACK);
-    skia::textlayout::TextStyle textStyle;
-    textStyle.setForegroundColor(paint);
-    textStyle.setFontFamilies({ SkString("Microsoft YaHei") });
-    textStyle.setFontSize(42.0f);
-    textStyle.setLetterSpacing(-0.05f);
-    textStyle.setHeightOverride(true);
-    skia::textlayout::ParagraphStyle paragraphStyle;
-    paragraphStyle.setTextStyle(textStyle);
-    paragraphStyle.setTextAlign(skia::textlayout::TextAlign::kLeft);
-    auto factory = SkShapers::BestAvailable();
-    sk_sp<SkUnicode> unicodeObj(factory->getUnicode());
-    skia::textlayout::ParagraphBuilderImpl builder(paragraphStyle, fontCollection, unicodeObj);
-    const char* hello = "test test test";
-    builder.addText(hello,strlen(hello));
-    auto paragraph = builder.Build();
-    paragraph->layout(w);
-    canvas->translate(10, 10);
-    paragraph->paint(canvas, 0, 0);*/
+    paragraph->paint(canvas, 10, 10);
 }
 
 
