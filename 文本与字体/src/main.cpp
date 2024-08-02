@@ -52,7 +52,7 @@ void drawCJKText(SkCanvas* canvas)
 
     auto text2 = wideStrToStr(text1);
     canvas->drawString(text2.c_str(), 20, 240, font, paint);
-    //canvas->drawSimpleText(text.c_str(), text.size(), SkTextEncoding::kUTF8, 20, 240, font, paint);
+    //canvas->drawSimpleText(text2.c_str(), text2.size(), SkTextEncoding::kUTF8, 20, 240, font, paint);
 
     std::u16string text3{ u"你好，世界！" };
     length = text3.size() * sizeof(char16_t);

@@ -7,6 +7,7 @@
 #include "include/core/SkExecutor.h"
 #include "include/core/SkPath.h"
 #include "src/base/SkUTF.h"
+#include "include/private/base/SkSemaphore.h"
 
 #include "shape.h"
 
@@ -437,9 +438,6 @@ void Editor::paint(SkCanvas* c, PaintOpts options) {
     if (!c) {
         return;
     }
-
-    c->drawPaint(SkPaint(options.fBackgroundColor));
-
     SkPaint selection = SkPaint(options.fSelectionColor);
     auto cmp = [](const Editor::TextPosition& u, const Editor::TextPosition& v) { return u < v; };
     for (TextPosition pos = std::min(options.fSelectionBegin, options.fSelectionEnd, cmp),
@@ -452,8 +450,11 @@ void Editor::paint(SkCanvas* c, PaintOpts options) {
         c->drawRect(offset(l.fCursorPos[pos.fTextByteIndex], l.fOrigin), selection);
     }
 
-    if (fLines.size() > 0) {
-        c->drawRect(Editor::getLocation(options.fCursor), SkPaint(options.fCursorColor));
+    if (fLines.size() > 0 && options.fCursorColor.fA > 0.1) {
+        auto rect = Editor::getLocation(options.fCursor);
+        SkPaint paint;
+        paint.setColor(options.fCursorColor);
+        c->drawRect(rect, paint);
     }
 
     SkPaint foreground = SkPaint(options.fForegroundColor);
@@ -478,17 +479,17 @@ void Editor::reshapeAll() {
             if (!line.fShaped) {
                 executor->add([&]() {
                     ShapeResult result = Shape(line.fText.begin(), line.fText.size(),
-                                               fFont, fLocale, shape_width);
-                    line.fBlob           = std::move(result.blob);
+                    fFont, fFontMgr, fLocale, shape_width);
+                    line.fBlob = std::move(result.blob);
                     line.fLineEndOffsets = std::move(result.lineBreakOffsets);
-                    line.fCursorPos      = std::move(result.glyphBounds);
+                    line.fCursorPos = std::move(result.glyphBounds);
                     line.fWordBoundaries = std::move(result.wordBreaks);
-                    line.fHeight         = result.verticalAdvance;
+                    line.fHeight = result.verticalAdvance;
                     line.fShaped = true;
                     semaphore.signal();
-                }
-                ++jobCount;
-            });
+                    ++jobCount;
+                    });
+            }
         }
         while (jobCount-- > 0) { semaphore.wait(); }
         #else

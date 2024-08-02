@@ -47,10 +47,12 @@ std::vector<bool> GetUtf8WordBoundaries(const char* begin, size_t byteCount, con
     }
     std::vector<SkUnicode::Position> positions;
     if (!unicode->getWords(begin, byteCount, locale, &positions) || byteCount == 0) {
+    //if (!unicode->getUtf8Words(begin, byteCount, locale, &positions) || byteCount == 0) {
         return {};
     }
     std::vector<bool> result;
     result.resize(byteCount);
+    //result.resize(positions.size());
     for (auto& pos : positions) {
         result[pos] = true;
     }

@@ -24,33 +24,8 @@ add_subdirectory(src)
 if(WIN32)
     set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} /SUBSYSTEM:WINDOWS")
     set_property(TARGET ${PROJECT_NAME} PROPERTY VS_DPI_AWARE "PerMonitor")
-    target_compile_definitions(${PROJECT_NAME} PRIVATE $<$<CONFIG:Debug>:UNICODE DEBUG NOMINMAX _SILENCE_ALL_CXX20_DEPRECATION_WARNINGS SK_DEBUG WIN32 _WINDOWS>)
-    target_compile_definitions(${PROJECT_NAME} PRIVATE $<$<CONFIG:Release>:UNICODE NDEBUG NOMINMAX _SILENCE_ALL_CXX20_DEPRECATION_WARNINGS WIN32 _WINDOWS>)
-    TARGET_LINK_LIBRARIES(${PROJECT_NAME} 
-    skresources
-    sksg
-    skshaper
-    skunicode_core
-    skunicode_icu
-    spirv_cross
-    svg
-    wuffs
-    zlib
-    bentleyottmann
-    compression_utils_portable
-    d3d12allocator
-    expat
-    harfbuzz
-    icu
-    libjpeg
-    libpng
-    libwebp
-    libwebp_sse41
-    pathkit
-    skcms
-    skia
-    skottie
-    skparagraph
-    kernel32 user32 shell32 usp10)
+    target_compile_definitions(${PROJECT_NAME} PRIVATE $<$<CONFIG:Debug>:SK_EDITOR_GO_FAST SK_UNICODE_ICU_IMPLEMENTATION SK_SHAPER_HARFBUZZ_AVAILABLE SK_SHAPER_UNICODE_AVAILABLE UNICODE DEBUG NOMINMAX _SILENCE_ALL_CXX20_DEPRECATION_WARNINGS SK_DEBUG WIN32 _WINDOWS>)
+    target_compile_definitions(${PROJECT_NAME} PRIVATE $<$<CONFIG:Release>:SK_EDITOR_GO_FAST SK_UNICODE_ICU_IMPLEMENTATION SK_SHAPER_HARFBUZZ_AVAILABLE SK_SHAPER_UNICODE_AVAILABLE UNICODE NDEBUG NOMINMAX _SILENCE_ALL_CXX20_DEPRECATION_WARNINGS WIN32 _WINDOWS>)
+    TARGET_LINK_LIBRARIES(${PROJECT_NAME} skia skparagraph icu skunicode_core skunicode_icu skshaper harfbuzz kernel32 user32 shell32 usp10)
 elseif(APPLE)
 endif()
