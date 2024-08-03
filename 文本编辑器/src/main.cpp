@@ -26,6 +26,23 @@ Editor::TextPosition fMarkPos;
 bool fShiftDown = false;
 bool fBlink = false;
 
+void activeKeyboard(long x,long y) {
+    if (HIMC himc = ImmGetContext(hwnd))
+    {
+        COMPOSITIONFORM comp = {};
+        comp.ptCurrentPos.x = x;
+        comp.ptCurrentPos.y = y;
+        comp.dwStyle = CFS_FORCE_POSITION;
+        ImmSetCompositionWindow(himc, &comp);
+        CANDIDATEFORM cand = {};
+        cand.dwStyle = CFS_CANDIDATEPOS;
+        cand.ptCurrentPos.x = x;
+        cand.ptCurrentPos.y = y;
+        ImmSetCandidateWindow(himc, &cand);
+        ImmReleaseContext(hwnd, himc);
+    }
+}
+
 std::string wideStrToStr(const std::wstring& wstr)
 {
     const int count = WideCharToMultiByte(CP_UTF8, 0, wstr.c_str(), (int)wstr.length(), NULL, 0, NULL, NULL);
@@ -38,13 +55,16 @@ void init() {
     std::wstring text{ L"你好" };
     auto text2 = wideStrToStr(text);
     fEditor.insert(Editor::TextPosition{ 0, 0 }, text2.data(), text2.length());
-
     auto fontMgr = SkFontMgr_New_GDI();
     fEditor.setFontMgr(fontMgr);
     SkFontStyle style(SkFontStyle::kNormal_Weight, SkFontStyle::kNormal_Width, SkFontStyle::kUpright_Slant);
     auto typeFace = fontMgr->matchFamilyStyle("Microsoft YaHei", style);
     fEditor.setFont(SkFont(typeFace, 32));
     fEditor.setWidth(w - 2 * fMargin);
+
+    SkIRect cursor = fEditor.getLocation(fTextPos).roundOut();
+    activeKeyboard(cursor.fRight, cursor.fBottom);
+
     SetTimer(hwnd, WM_REFRESH, 600, (TIMERPROC)NULL);
 }
 void repaintWin(const HWND hWnd)
@@ -99,21 +119,7 @@ bool move(Editor::TextPosition pos, bool shift) {
     fTextPos = pos;
     // scroll if needed.
     SkIRect cursor = fEditor.getLocation(fTextPos).roundOut();
-
-    if (HIMC himc = ImmGetContext(hwnd))
-    {
-        COMPOSITIONFORM comp = {};
-        comp.ptCurrentPos.x = cursor.fRight;
-        comp.ptCurrentPos.y = cursor.fBottom;
-        comp.dwStyle = CFS_FORCE_POSITION;
-        ImmSetCompositionWindow(himc, &comp);
-        CANDIDATEFORM cand = {};
-        cand.dwStyle = CFS_CANDIDATEPOS;
-        cand.ptCurrentPos.x = cursor.fRight;
-        cand.ptCurrentPos.y = cursor.fBottom;
-        ImmSetCandidateWindow(himc, &cand);
-        ImmReleaseContext(hwnd, himc);
-    }
+    activeKeyboard(cursor.fRight, cursor.fBottom);
 
 
     if (fPos < cursor.bottom() - h + 2 * fMargin) {
@@ -125,18 +131,6 @@ bool move(Editor::TextPosition pos, bool shift) {
     fBlink = true;
     InvalidateRect(hwnd, nullptr, false);
     return true;
-}
-
-
-bool onChar(SkUnichar c) {
-    if (((unsigned)c < 0x7F && (unsigned)c >= 0x20) || c == '\n') {
-        char ch = (char)c;
-        fEditor.insert(fTextPos, &ch, 1);
-        auto moveType = getMoveType(VK_RIGHT);
-        auto pos = fEditor.move(moveType, fTextPos);
-        move(pos, false);
-    }
-    return false;
 }
 
 LRESULT CALLBACK wndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
@@ -218,8 +212,12 @@ LRESULT CALLBACK wndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
                     break;
                 }
                 case VK_RETURN: {
-                    onChar('\n');
-                    break;
+                    char ch = (char)'\n';
+                    fEditor.insert(fTextPos, &ch, 1);
+                    auto moveType = getMoveType(VK_RIGHT);
+                    auto pos = fEditor.move(moveType, fTextPos);
+                    move(pos, false);
+                    return 0;
                 }
                 default:
                 {
@@ -229,13 +227,19 @@ LRESULT CALLBACK wndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
             return 0;
         }
         case WM_CHAR: {
-            std::wstring word{ (wchar_t)wParam };
-            auto text2 = wideStrToStr(word);
-            fEditor.insert(fTextPos, text2.data(), text2.length());
-            auto moveType = getMoveType(VK_RIGHT);
-            auto pos = fEditor.move(moveType, fTextPos);
-            move(pos, false);
-            return 0;
+            if ((wParam >= 32 && wParam <= 126) || // 可打印的ASCII字符范围
+                (wParam >= 160 && wParam <= 55295) || // 可打印的Unicode字符范围
+                (wParam >= 57344 && wParam <= 65535)) // 高位可打印的Unicode字符范围
+            { 
+                std::wstring word{ (wchar_t)wParam };
+                auto text2 = wideStrToStr(word);
+                fEditor.insert(fTextPos, text2.data(), text2.length());
+                auto moveType = getMoveType(VK_RIGHT);
+                auto pos = fEditor.move(moveType, fTextPos);
+                move(pos, false);
+                return 0;
+            }
+            break;
         }
         default:
         {
