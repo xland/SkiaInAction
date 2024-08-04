@@ -11,7 +11,7 @@ void paint(const HWND hWnd)
         return;
     SkColor *surfaceMemory = new SkColor[w * h]{SK_ColorBLACK};
     SkImageInfo info = SkImageInfo::MakeN32Premul(w, h);
-    auto canvas = SkCanvas::MakeRasterDirect(info, surfaceMemory, 4 * w);
+    std::unique_ptr<SkCanvas> canvas = SkCanvas::MakeRasterDirect(info, surfaceMemory, 4 * w);
     SkPaint paint;
     paint.setColor(SK_ColorRED);
     SkRect rect = SkRect::MakeXYWH(w - 150, h - 150, 140, 140);
