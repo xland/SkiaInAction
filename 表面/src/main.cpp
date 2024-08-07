@@ -23,7 +23,7 @@ void paint(const HWND hWnd)
         return;
     SkColor *surfaceMemory = new SkColor[w * h]{0xff000000};
     SkImageInfo info = SkImageInfo::MakeN32Premul(w, h);
-    auto surface = SkSurfaces::WrapPixels(info, surfaceMemory, w * 4);
+    sk_sp<SkSurface> surface = SkSurfaces::WrapPixels(info, surfaceMemory, w * 4);
     surfaceWritePixels(surface.get());
 
     PAINTSTRUCT ps;
