@@ -50,21 +50,14 @@ void recordCanvas(SkCanvas *canvas)
 {
     SkPictureRecorder recorder;
     SkCanvas *canvasRecorder = recorder.beginRecording(w, h);
-    auto maxR = std::min(w / 2, h / 2);
-    SkRandom rnd;
-    SkPaint paint;
-    paint.setAntiAlias(true);
-    for (size_t i = 0; i < 12; i++)
+    for (size_t i = 0; i < 10000; i++)
     {
-        auto r = rnd.nextRangeU(10, maxR);
-        auto x = rnd.nextRangeU(0 + r, w - r);
-        auto y = rnd.nextRangeU(0 + r, h - r);
-        auto color = rnd.nextRangeU(0xFF666666, 0xFFFFFFFF);
-        paint.setColor(color);
-        canvasRecorder->drawCircle(SkPoint::Make(x, y), r, paint);
+        SkPaint paint;
+        paint.setColor(cs[i]);
+        canvasRecorder->drawCircle(SkPoint::Make(xs[i], ys[i]), rs[i], paint);
     }
     sk_sp<SkPicture> picture = recorder.finishRecordingAsPicture();
-    canvas->drawPicture(picture);
+    canvas->drawPicture(picture); //1.4√Î
 }
 
 void paint(const HWND hWnd)
@@ -72,15 +65,16 @@ void paint(const HWND hWnd)
     if (w <= 0 || h <= 0)
         return;
     SkColor *surfaceMemory = new SkColor[w * h]{0xff000000};
-    SkColor* surfaceMemory2 = new SkColor[w * h]{ 0xff0000ff };
+    //SkColor* surfaceMemory2 = new SkColor[w * h]{ 0xff0000ff };
     SkImageInfo info = SkImageInfo::MakeN32Premul(w, h);
     auto canvas = SkCanvas::MakeRasterDirect(info, surfaceMemory, 4 * w);
-    auto canvas2 = SkCanvas::MakeRasterDirect(info, surfaceMemory2, 4 * w);
-    canvas->writePixels(info, surfaceMemory2, w * 4, 0, 0);
-
+    //auto canvas2 = SkCanvas::MakeRasterDirect(info, surfaceMemory2, 4 * w);
+    //canvas->writePixels(info, surfaceMemory2, w * 4, 0, 0); //∑«≥£øÏ 1∫¡√Î
 
     prepareData();
-    drawCircles(canvas.get()); // 0.6√Î
+    //drawCircles(canvas.get()); // 0.6√Î
+
+    recordCanvas(canvas.get());
 
     PAINTSTRUCT ps;
     auto dc = BeginPaint(hWnd, &ps);
