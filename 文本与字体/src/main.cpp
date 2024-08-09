@@ -20,7 +20,7 @@ void drawText(SkCanvas *canvas)
 {
     auto fontMgr = SkFontMgr_New_GDI();
     SkFontStyle fontStyle = SkFontStyle::Normal();
-    auto typeFace = fontMgr->matchFamilyStyle("Microsoft YaHei", fontStyle);
+    sk_sp<SkTypeface> typeFace = fontMgr->matchFamilyStyle("Microsoft YaHei", fontStyle);
     SkFont font(typeFace,56);
     SkPaint paint;
     paint.setColor(0xFF00FFFF);
