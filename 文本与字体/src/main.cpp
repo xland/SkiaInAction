@@ -18,7 +18,7 @@ int w{400}, h{400};
 
 void drawText(SkCanvas *canvas)
 {
-    auto fontMgr = SkFontMgr_New_GDI();
+    sk_sp<SkFontMgr> fontMgr = SkFontMgr_New_GDI();
     SkFontStyle fontStyle = SkFontStyle::Normal();
     sk_sp<SkTypeface> typeFace = fontMgr->matchFamilyStyle("Microsoft YaHei", fontStyle);
     SkFont font(typeFace,56);
@@ -115,7 +115,7 @@ void measureText(SkCanvas* canvas)
 
 
 void loadFontFile(SkCanvas* canvas) {
-    auto fontPath = L"D:\\project\\SkiaInAction\\字体与文本\\AlimamaDaoLiTi.ttf";
+    auto fontPath = L"D:\\project\\SkiaInAction\\文本与字体\\AlimamaDaoLiTi.ttf";
     auto fontPathStr = wideStrToStr(fontPath);
     auto data{ SkData::MakeFromFileName(fontPathStr.data())};
     auto fontMgr = SkFontMgr_New_GDI();
@@ -130,7 +130,7 @@ void loadFontFile(SkCanvas* canvas) {
 }
 
 void drawFontIcon(SkCanvas* canvas) {
-    auto fontPath = L"D:\\project\\SkiaInAction\\字体与文本\\fa-solid-900.ttf";
+    auto fontPath = L"D:\\project\\SkiaInAction\\文本与字体\\fa-solid-900.ttf";
     auto fontPathStr = wideStrToStr(fontPath);
     auto data{ SkData::MakeFromFileName(fontPathStr.data()) };
     auto fontMgr = SkFontMgr_New_GDI();
@@ -162,7 +162,7 @@ void drawFontIcon(SkCanvas* canvas) {
 }
 
 void fontBorder(SkCanvas* canvas) {
-    auto fontPath = L"D:\\project\\SkiaInAction\\字体与文本\\AlimamaDaoLiTi.ttf";
+    auto fontPath = L"D:\\project\\SkiaInAction\\文本与字体\\AlimamaDaoLiTi.ttf";
     auto fontPathStr = wideStrToStr(fontPath);
     auto data{ SkData::MakeFromFileName(fontPathStr.data()) };
     auto fontMgr = SkFontMgr_New_GDI();
@@ -180,7 +180,7 @@ void fontBorder(SkCanvas* canvas) {
 }
 
 void textBlob(SkCanvas* canvas) {  
-    auto fontPath = L"D:\\project\\SkiaInAction\\字体与文本\\AlimamaDaoLiTi.ttf";
+    auto fontPath = L"D:\\project\\SkiaInAction\\文本与字体\\AlimamaDaoLiTi.ttf";
     auto fontPathStr = wideStrToStr(fontPath);
     auto data{ SkData::MakeFromFileName(fontPathStr.data()) };
     auto fontMgr = SkFontMgr_New_GDI();
@@ -214,8 +214,8 @@ void paint(const HWND hWnd)
     SkColor *surfaceMemory = new SkColor[w * h]{0xff000000};
     SkImageInfo info = SkImageInfo::MakeN32Premul(w, h);
     auto canvas = SkCanvas::MakeRasterDirect(info, surfaceMemory, 4 * w);
-    //drawText(canvas.get());
-    drawCJKText(canvas.get());
+    drawText(canvas.get());
+    //drawCJKText(canvas.get());
     //textPosition(canvas.get());
     //measureText(canvas.get());
     //loadFontFile(canvas.get());
