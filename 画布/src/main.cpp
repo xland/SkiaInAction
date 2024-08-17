@@ -7,6 +7,7 @@
 #include "include/core/SkPicture.h"
 #include "include/core/SkPictureRecorder.h"
 #include "src/base/SkRandom.h"
+#include "include/core/SkStream.h"
 
 #include <vector>
 
@@ -84,7 +85,7 @@ void skewCanvas(SkCanvas *canvas)
     rect = SkRect::MakeXYWH(0, 0, 80, 80);
     canvas->drawRect(rect, paint);
 }
-void saveCanvas(SkCanvas *canvas)
+void saveCanvasLayer(SkCanvas *canvas)
 {
     auto rect = SkRect::MakeXYWH(20, 20, 100, 100);
     SkPaint paint;
@@ -102,32 +103,13 @@ void saveCanvas(SkCanvas *canvas)
     canvas->drawRect(rect, paint);
     canvas->restore();
 }
-void clipCanvas(SkCanvas *canvas)
-{
-    canvas->save();
-    auto rect = SkRect::MakeXYWH(0, 0, w / 2, h / 2);
-    canvas->clipRect(rect);
 
-    SkPaint paint;
-    paint.setAntiAlias(true);
-    paint.setColor(0xff00ffff);
-    auto r = std::min(w / 2, h / 2);
-    canvas->drawCircle(SkPoint::Make(w / 2, h / 2), r, paint);
-    canvas->restore();
-
-    canvas->save();
-    rect = SkRect::MakeXYWH(w / 2, h / 2, w / 2, h / 2);
-    canvas->clipRect(rect);
-    paint.setColor(0xffffff00);
-    canvas->drawCircle(SkPoint::Make(w / 2, h / 2), r, paint);
-    canvas->restore();
-}
-void drawEraser(SkCanvas *canvas)
+void drawEraser(SkCanvas* canvas)
 {
     SkPaint paint;
     paint.setAntiAlias(true);
-    SkPoint pts[2]{SkPoint::Make(0, 0), SkPoint::Make(w, h)};
-    SkColor colors[6]{0xFF00FFFF, 0xFFFF00FF, 0xFFFFFF00, 0xFF0000FF, 0xFF00FF00, 0xFFFF0000};
+    SkPoint pts[2]{ SkPoint::Make(0, 0), SkPoint::Make(w, h) };
+    SkColor colors[6]{ 0xFF00FFFF, 0xFFFF00FF, 0xFFFFFF00, 0xFF0000FF, 0xFF00FF00, 0xFFFF0000 };
     auto shader = SkGradientShader::MakeLinear(pts, colors, nullptr, 6, SkTileMode::kClamp);
     paint.setShader(shader);
     canvas->drawPaint(paint);
@@ -141,27 +123,7 @@ void drawEraser(SkCanvas *canvas)
     canvas->drawRect(SkRect::MakeXYWH(w / 2 - 50, h / 2 - 50, 100, 100), paint);
     canvas->restore();
 }
-void recordCanvas(SkCanvas *canvas)
-{
-    SkPictureRecorder recorder;
-    SkCanvas *canvasRecorder = recorder.beginRecording(w, h);
-    auto maxR = std::min(w / 2, h / 2);
-    SkRandom rnd;
-    SkPaint paint;
-    paint.setAntiAlias(true);
-    for (size_t i = 0; i < 2; i++)
-    {
-        auto r = rnd.nextRangeU(10, maxR);
-        auto x = rnd.nextRangeU(0 + r, w - r);
-        auto y = rnd.nextRangeU(0 + r, h - r);
-        auto color = rnd.nextRangeU(1, 0xFFFFFFFF);
-        paint.setColor(color);
-        canvasRecorder->drawCircle(SkPoint::Make(x, y), r, paint);
-    }
-    auto picture = recorder.finishRecordingAsPicture();
-    canvas->drawPicture(picture);
-}
-void drawPixel(SkCanvas *canvas)
+void drawPixel(SkCanvas* canvas)
 {
     SkImageInfo info = SkImageInfo::MakeN32Premul(w, h);
     std::vector<SkColor> pixels;
@@ -190,6 +152,94 @@ void drawPixel(SkCanvas *canvas)
     }
     canvas->writePixels(info, &pixels.front(), w * 4, 0, 0);
 }
+void clipCanvas(SkCanvas *canvas)
+{
+    canvas->save();
+    auto rect = SkRect::MakeXYWH(0, 0, w / 2, h / 2);
+    canvas->clipRect(rect);
+
+    SkPaint paint;
+    paint.setAntiAlias(true);
+    paint.setColor(0xff00ffff);
+    auto r = std::min(w / 2, h / 2);
+    canvas->drawCircle(SkPoint::Make(w / 2, h / 2), r, paint);
+    canvas->restore();
+
+    canvas->save();
+    rect = SkRect::MakeXYWH(w / 2, h / 2, w / 2, h / 2);
+    canvas->clipRect(rect);
+    paint.setColor(0xffffff00);
+    canvas->drawCircle(SkPoint::Make(w / 2, h / 2), r, paint);
+    canvas->restore();
+}
+void recordCanvas(SkCanvas *canvas)
+{
+    SkPictureRecorder recorder;
+    SkCanvas *canvasRecorder = recorder.beginRecording(w, h);
+    auto maxR = std::min(w / 2, h / 2);
+    SkRandom rnd;
+    SkPaint paint;
+    paint.setAntiAlias(true);
+    for (size_t i = 0; i < 12; i++)
+    {
+        auto r = rnd.nextRangeU(10, maxR);
+        auto x = rnd.nextRangeU(0 + r, w - r);
+        auto y = rnd.nextRangeU(0 + r, h - r);
+        auto color = rnd.nextRangeU(0xFF666666, 0xFFFFFFFF);
+        paint.setColor(color);
+        canvasRecorder->drawCircle(SkPoint::Make(x, y), r, paint);
+    }
+    sk_sp<SkPicture> picture = recorder.finishRecordingAsPicture();
+    canvas->drawPicture(picture);
+}
+
+void serializePicture(SkCanvas* canvas) {
+    SkPictureRecorder recorder;
+    SkCanvas* canvasRecorder = recorder.beginRecording(w, h);
+    auto maxR = std::min(w / 2, h / 2);
+    SkRandom rnd;
+    SkPaint paint;
+    paint.setAntiAlias(true);
+    for (size_t i = 0; i < 12; i++)
+    {
+        auto r = rnd.nextRangeU(10, maxR);
+        auto x = rnd.nextRangeU(0 + r, w - r);
+        auto y = rnd.nextRangeU(0 + r, h - r);
+        auto color = rnd.nextRangeU(0xFF666666, 0xFFFFFFFF);
+        paint.setColor(color);
+        canvasRecorder->drawCircle(SkPoint::Make(x, y), r, paint);
+    }
+    sk_sp<SkPicture> picture = recorder.finishRecordingAsPicture();
+    SkFILEWStream stream("picture-data.data");
+    picture->serialize(&stream);
+    stream.flush();
+}
+
+void deserializePicture(SkCanvas* canvas) {
+    SkFILEStream stream("picture-data.data");
+    auto picture = SkPicture::MakeFromStream(&stream);
+    canvas->drawPicture(picture);
+}
+
+class AboutCB : public SkPicture::AbortCallback {
+public:
+    bool abort() override { 
+        fCalls++;
+        if (fCalls > 3) {
+            return true;
+        }
+        return false;
+    }
+private:
+    int fCalls = 0;
+};
+
+void playBackRecorder(SkCanvas* canvas) {    
+    SkFILEStream stream("picture-data.data");
+    auto picture = SkPicture::MakeFromStream(&stream);
+    AboutCB aboutCB;
+    picture->playback(canvas, &aboutCB);
+}
 
 void paint(const HWND hWnd)
 {
@@ -198,16 +248,19 @@ void paint(const HWND hWnd)
     SkColor *surfaceMemory = new SkColor[w * h]{0xff000000};
     SkImageInfo info = SkImageInfo::MakeN32Premul(w, h);
     auto canvas = SkCanvas::MakeRasterDirect(info, surfaceMemory, 4 * w);
-    translateCanvas(canvas.get());
+    // translateCanvas(canvas.get());
     // rotateCanvas(canvas.get());
     // scaleCanvas(canvas.get());
     // matrixCanvas(canvas.get());
     // skewCanvas(canvas.get());
-    // saveCanvas(canvas.get());
+    // saveCanvasLayer(canvas.get());
     // drawEraser(canvas.get());
     // drawPixel(canvas.get());
     // clipCanvas(canvas.get());
     // recordCanvas(canvas.get());
+    // serializePicture(canvas.get());
+    // deserializePicture(canvas.get());
+    playBackRecorder(canvas.get());
 
     PAINTSTRUCT ps;
     auto dc = BeginPaint(hWnd, &ps);

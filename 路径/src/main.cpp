@@ -79,7 +79,7 @@ void drawDashPath(SkCanvas* canvas)
     canvas->drawPath(path, paint);
 }
 
-void drawPathMask(SkCanvas* canvas)
+void drawPathEvenOdd(SkCanvas* canvas)
 {
     canvas->clear(0xFF00ffff);
     SkPaint paint;
@@ -88,7 +88,7 @@ void drawPathMask(SkCanvas* canvas)
     SkRect rect = SkRect::MakeLTRB(100, 100, w-100, h-100);
     path.addRect(rect);
     path.setFillType(SkPathFillType::kInverseEvenOdd);
-    //bool flag = path.contains(w / 2, h / 2);  ֵΪfalse
+    //bool flag = path.contains(w / 2, h / 2);  ֵfalse
     canvas->drawPath(path, paint);
 }
 
@@ -103,7 +103,7 @@ void paint(const HWND hWnd)
     // drawBezierPath(canvas.get());
     // drawMultiPath(canvas.get());
     //drawDashPath(canvas.get());
-    drawPathMask(canvas.get());
+    drawPathEvenOdd(canvas.get());
     PAINTSTRUCT ps;
     auto dc = BeginPaint(hWnd, &ps);
     BITMAPINFO bmpInfo = {sizeof(BITMAPINFOHEADER), w, 0 - h, 1, 32, BI_RGB, h * 4 * w, 0, 0, 0, 0};

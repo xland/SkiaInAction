@@ -46,8 +46,10 @@ void animateGif()
             codec->getPixels(imgInfo, frameBitmap->getPixels(), imgInfo.minRowBytes(), &option);
             InvalidateRect(hwnd, nullptr, false);
             auto end = std::chrono::system_clock::now();
-            auto msCount = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
-            auto duration = std::chrono::milliseconds(frameInfo[option.fFrameIndex].fDuration - msCount);
+            auto tSpan = end - start;
+            auto ms = std::chrono::duration_cast<std::chrono::milliseconds>(tSpan);
+            auto msCount = frameInfo[option.fFrameIndex].fDuration - ms.count();
+            auto duration = std::chrono::milliseconds(msCount);
             std::this_thread::sleep_for(duration);
             if (option.fFrameIndex == frameCount - 1)
             {
