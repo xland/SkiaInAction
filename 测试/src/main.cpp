@@ -1,4 +1,4 @@
-#include <windows.h>
+ï»¿#include <windows.h>
 #include <string>
 #include "include/core/SkSurface.h"
 #include "include/core/SkCanvas.h"
@@ -11,7 +11,7 @@
 
 #include <vector>
 
-int w{400}, h{400};
+int w{3840}, h{2160};
 
 std::vector<uint32_t> rs;
 std::vector<uint32_t> xs;
@@ -36,7 +36,7 @@ void prepareData() {
 
 
 void drawCircles(SkCanvas* canvas) {
-    
+
     for (size_t i = 0; i < 10000; i++)
     {
         SkPaint paint;
@@ -57,7 +57,7 @@ void recordCanvas(SkCanvas *canvas)
         canvasRecorder->drawCircle(SkPoint::Make(xs[i], ys[i]), rs[i], paint);
     }
     sk_sp<SkPicture> picture = recorder.finishRecordingAsPicture();
-    canvas->drawPicture(picture); //1.4Ãë
+    canvas->drawPicture(picture); //1.4ç§’
 }
 
 void paint(const HWND hWnd)
@@ -69,10 +69,10 @@ void paint(const HWND hWnd)
     SkImageInfo info = SkImageInfo::MakeN32Premul(w, h);
     auto canvas = SkCanvas::MakeRasterDirect(info, surfaceMemory, 4 * w);
     //auto canvas2 = SkCanvas::MakeRasterDirect(info, surfaceMemory2, 4 * w);
-    //canvas->writePixels(info, surfaceMemory2, w * 4, 0, 0); //·Ç³£¿ì 1ºÁÃë
+    //canvas->writePixels(info, surfaceMemory2, w * 4, 0, 0); //éå¸¸å¿« 1æ¯«ç§’
 
     prepareData();
-    //drawCircles(canvas.get()); // 0.6Ãë
+    //drawCircles(canvas.get()); // 0.6ç§’
 
     recordCanvas(canvas.get());
 

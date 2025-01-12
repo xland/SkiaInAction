@@ -36,6 +36,31 @@ void rotateCanvas(SkCanvas *canvas)
     paint.setColor(0xffffff00);
     canvas->drawRect(rect, paint);
 }
+
+void scaleCanvas(SkCanvas* canvas) {
+    auto rect = SkRect::MakeXYWH(10, 10, 100, 100);
+    SkPaint paint;
+    paint.setColor(0xff00ffff);
+    canvas->drawRect(rect, paint);
+    canvas->scale(2, 2);
+    paint.setColor(0xffffff00);
+    canvas->drawRect(rect, paint);
+}
+
+void matrixCanvas(SkCanvas* canvas) {
+    SkMatrix matrix;
+    matrix.postTranslate(50, 50); //移动
+    matrix.postRotate(8);  //顺时针旋转 8 度
+    matrix.postScale(1.5, 1.5); //放大
+    canvas->concat(matrix);
+
+    auto rect = SkRect::MakeXYWH(0, 0, 100, 100);
+    SkPaint paint;
+    paint.setAntiAlias(true);
+    paint.setColor(0xff00ffff);
+    canvas->drawRect(rect, paint);
+}
+
 void skewCanvas(SkCanvas *canvas)
 {
     auto rect = SkRect::MakeXYWH(60, 60, 80, 80);
@@ -225,6 +250,8 @@ void paint(const HWND hWnd)
     auto canvas = SkCanvas::MakeRasterDirect(info, surfaceMemory, 4 * w);
     // translateCanvas(canvas.get());
     // rotateCanvas(canvas.get());
+    // scaleCanvas(canvas.get());
+    // matrixCanvas(canvas.get());
     // skewCanvas(canvas.get());
     // saveCanvasLayer(canvas.get());
     // drawEraser(canvas.get());

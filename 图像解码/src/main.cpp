@@ -1,5 +1,7 @@
 ﻿#include <windows.h>
 #include <string>
+#include "include/core/SkImage.h"
+
 #include "include/core/SkSurface.h"
 #include "include/core/SkCanvas.h"
 #include "include/core/SkRRect.h"
@@ -8,16 +10,6 @@
 #include "include/core/SkStream.h"
 #include "include/core/SkBitmap.h"
 #include "include/codec/SkCodec.h"
-
-#include "include/core/SkMaskFilter.h"
-#include "include/core/SkBlurTypes.h"
-#include "include/core/SkColorFilter.h"
-#include "include/effects/SkImageFilters.h"
-
-#include "include/encode/SkPngEncoder.h"
-#include "include/encode/SkJpegEncoder.h"
-#include "include/encode/SkWebpEncoder.h"
-
 
 #include "include/codec/SkPngDecoder.h"
 #include "include/codec/SkJpegDecoder.h"
