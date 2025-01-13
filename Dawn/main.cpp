@@ -163,44 +163,44 @@ void initDAWN() {
         SkASSERT(false);
         return;
     }
-    //skgpu::graphite::RecorderOptions options;
-    //options.fImageProvider.reset(new TestingImageProvider);
-    //fGraphiteRecorder = fGraphiteContext->makeRecorder(options);
+    skgpu::graphite::RecorderOptions options;
+    options.fImageProvider.reset(new TestingImageProvider);
+    fGraphiteRecorder = fGraphiteContext->makeRecorder(options);
 }
 void paint(const HWND hWnd)
 {
-    //wgpu::SurfaceTexture surfaceTexture;
-    //fSurface.GetCurrentTexture(&surfaceTexture);
-    //SkASSERT(surfaceTexture.texture);
-    //auto texture = surfaceTexture.texture;
-    //skgpu::graphite::DawnTextureInfo info(/*sampleCount=*/1,
-    //    skgpu::Mipmapped::kNo,
-    //    fSurfaceFormat,
-    //    texture.GetUsage(),
-    //    wgpu::TextureAspect::All);
-    //auto backendTex = skgpu::graphite::BackendTextures::MakeDawn(texture.Get());
-    //auto surface = SkSurfaces::WrapBackendTexture(fGraphiteRecorder.get(),
-    //    backendTex,
-    //    kBGRA_8888_SkColorType,
-    //    fDisplayParams.fColorSpace,
-    //    &fDisplayParams.fSurfaceProps);  
-    //auto canvas = surface->getCanvas();
-    //SkPaint paint;
-    //paint.setColor(SK_ColorRED);
-    //SkRect rect = SkRect::MakeXYWH(w - 150, h - 150, 140, 140);
-    //canvas->drawRect(rect, paint);
-    ////->flushAndSubmit(backbuffer.get(), GrSyncCpu::kNo);
-    //if (fGraphiteContext) {
-    //    SkASSERT(fGraphiteRecorder);
-    //    std::unique_ptr<skgpu::graphite::Recording> recording = fGraphiteRecorder->snap();
-    //    if (recording) {
-    //        skgpu::graphite::InsertRecordingInfo info;
-    //        info.fRecording = recording.get();
-    //        fGraphiteContext->insertRecording(info);
-    //        fGraphiteContext->submit(skgpu::graphite::SyncToCpu::kNo);
-    //    }
-    //}
-    //fSurface.Present();
+    wgpu::SurfaceTexture surfaceTexture;
+    fSurface.GetCurrentTexture(&surfaceTexture);
+    SkASSERT(surfaceTexture.texture);
+    auto texture = surfaceTexture.texture;
+    skgpu::graphite::DawnTextureInfo info(/*sampleCount=*/1,
+        skgpu::Mipmapped::kNo,
+        fSurfaceFormat,
+        texture.GetUsage(),
+        wgpu::TextureAspect::All);
+    auto backendTex = skgpu::graphite::BackendTextures::MakeDawn(texture.Get());
+    auto surface = SkSurfaces::WrapBackendTexture(fGraphiteRecorder.get(),
+        backendTex,
+        kBGRA_8888_SkColorType,
+        fDisplayParams.fColorSpace,
+        &fDisplayParams.fSurfaceProps);  
+    auto canvas = surface->getCanvas();
+    SkPaint paint;
+    paint.setColor(SK_ColorRED);
+    SkRect rect = SkRect::MakeXYWH(w - 150, h - 150, 140, 140);
+    canvas->drawRect(rect, paint);
+    //->flushAndSubmit(backbuffer.get(), GrSyncCpu::kNo);
+    if (fGraphiteContext) {
+        SkASSERT(fGraphiteRecorder);
+        std::unique_ptr<skgpu::graphite::Recording> recording = fGraphiteRecorder->snap();
+        if (recording) {
+            skgpu::graphite::InsertRecordingInfo info;
+            info.fRecording = recording.get();
+            fGraphiteContext->insertRecording(info);
+            fGraphiteContext->submit(skgpu::graphite::SyncToCpu::kNo);
+        }
+    }
+    fSurface.Present();
 }
 LRESULT CALLBACK wndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
@@ -247,7 +247,7 @@ void initWindow()
         CW_USEDEFAULT, CW_USEDEFAULT, w, h,
         nullptr, nullptr, hinstance, nullptr);
     initDisplayParams();
-	//initDAWN();
+	initDAWN();
     ShowWindow(hwnd, SW_SHOW);
 }
 int APIENTRY wWinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _In_ LPTSTR lpCmdLine, _In_ int nCmdShow)

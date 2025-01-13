@@ -107,9 +107,9 @@ void paint(const HWND hWnd)
     SkImageInfo info = SkImageInfo::MakeN32Premul(w, h);
     auto canvas = SkCanvas::MakeRasterDirect(info, surfaceMemory, 4 * w);
 
-    //drawMutiText(canvas.get());
+    drawMutiText(canvas.get());
     //drawMutiText2(canvas.get());
-    drawTextAndEmoji(canvas.get());
+    //drawTextAndEmoji(canvas.get());
 
     PAINTSTRUCT ps;
     auto dc = BeginPaint(hWnd, &ps);
