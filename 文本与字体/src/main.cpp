@@ -59,6 +59,42 @@ void drawCJKText(SkCanvas* canvas)
     canvas->drawSimpleText(text3.c_str(), length, SkTextEncoding::kUTF16, 20, 180, font, paint);
 }
 
+
+void drawTextGlyphs(SkCanvas* canvas)
+{
+    SkPaint paint;
+    paint.setColor(0xFF00FFFF);
+    paint.setStroke(false);
+    auto fontMgr = SkFontMgr_New_GDI();
+    auto fontStyle = SkFontStyle::Normal();
+    auto typeFace = fontMgr->matchFamilyStyle("Microsoft YaHei", fontStyle);
+    SkFont font(typeFace, 38);
+
+    std::wstring text1{ L"你好，世界！AaBbCc,GgKkJj,123,****" };
+    auto length = text1.size() * sizeof(wchar_t);
+    std::vector<SkGlyphID> glyphs(text1.size());
+    int glyphCount = font.textToGlyphs(text1.data(), length, SkTextEncoding::kUTF16, glyphs.data(), text1.size());
+    std::vector<SkScalar> widths(glyphCount);
+    font.getWidthsBounds(glyphs.data(), glyphCount, widths.data(), nullptr, nullptr);
+    std::vector<SkPoint> positions(glyphCount);
+
+    SkFontMetrics metrics;
+    font.getMetrics(&metrics);
+    SkScalar x = 0;
+    for (int i = 0; i < glyphCount; ++i) {
+        positions[i] = SkPoint::Make(x, metrics.fDescent- metrics.fAscent);
+        x += widths[i]; // 累计宽度
+    }
+    canvas->drawGlyphs(glyphCount, glyphs.data(), positions.data(), SkPoint(0,0), font, paint);
+
+    x = positions[18].fX;
+    auto y = positions[18].fY;
+    SkPoint start = SkPoint(x, y + metrics.fAscent);// 字符顶部相对于基线的偏移  neagtive
+    SkPoint end = SkPoint(x, y + metrics.fDescent); // 字符底部相对于基线的偏移
+    paint.setStrokeWidth(1);
+    canvas->drawLine(start, end, paint);    
+}
+
 void textPosition(SkCanvas* canvas)
 {
     SkPaint paint;
