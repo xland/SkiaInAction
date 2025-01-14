@@ -1,0 +1,87 @@
+调试模式用不了这三个库：
+        allocator_shim
+        allocator_base
+        allocator_core
+把Skia调试库编译成MT，不用MTd了
+把此工程调试状态运行库也调成MT
+
+目前用不了GPU的能力，得重新搞一下这个项目的代码
+
+Skia编译参数，下面的编译参数会提示：Build argument has no effect.  skia_enable_sktext = true
+感觉和 skia_enable_skunicode有关，得把这个删掉
+
+# 编译Skia
+
+## Debug
+
+```
+clang_win = "C:\Program Files\LLVM"
+cc = "clang"
+cxx = "clang++"
+extra_cflags = [ "/MTd" ]
+is_official_build = false
+is_debug = false
+skia_use_system_expat = false
+skia_use_system_libjpeg_turbo = false
+skia_use_system_libpng = false
+skia_use_system_libwebp = false
+skia_use_system_zlib = false
+skia_use_system_harfbuzz = false
+skia_use_icu = false
+skia_use_vulkan = false
+skia_use_direct3d = false
+skia_use_webgpu = false
+skia_use_angle = false
+skia_use_metal = false
+skia_use_ffmpeg = false
+skia_use_dawn = true
+skia_use_gl = true   
+skia_enable_tools = false
+skia_enable_ganesh = true
+skia_enable_graphite = true
+skia_enable_gpu = true
+skia_enable_skparagraph = true
+skia_enable_skshaper = true
+skia_enable_skunicode = true
+```
+
+```
+bin/gn gen out/debug
+ninja -C out/debug
+```
+
+## Release
+
+```
+clang_win = "C:\Program Files\LLVM"
+cc = "clang"
+cxx = "clang++"
+extra_cflags = [ "/MT", "-O2", "-fno-exceptions", "-fno-rtti" ]
+is_official_build = false
+is_debug = false
+skia_use_system_expat = false
+skia_use_system_libjpeg_turbo = false
+skia_use_system_libpng = false
+skia_use_system_libwebp = false
+skia_use_system_zlib = false
+skia_use_system_harfbuzz = false
+skia_use_icu = false
+skia_use_vulkan = false
+skia_use_direct3d = false
+skia_use_webgpu = false
+skia_use_angle = false
+skia_use_metal = false
+skia_use_ffmpeg = false
+skia_use_dawn = true
+skia_use_gl = true   
+skia_enable_tools = false
+skia_enable_ganesh = true
+skia_enable_graphite = true
+skia_enable_gpu = true
+skia_enable_skparagraph = true
+skia_enable_skshaper = true
+skia_enable_skunicode = true
+```
+```
+ninja -C out/release
+```

@@ -47,7 +47,7 @@ void initDisplayParams() {
     static std::unique_ptr<SkExecutor> gGpuExecutor = SkExecutor::MakeFIFOThreadPool(2);
     fDisplayParams.fGrContextOptions.fExecutor = gGpuExecutor.get();
     fDisplayParams.fGrContextOptions.fAllowPathMaskCaching = true;
-    //displayParams.fGrContextOptions.fGpuPathRenderers = collect_gpu_path_renderers_from_flags();  //todo
+    //fDisplayParams.fGrContextOptions.fGpuPathRenderers = collect_gpu_path_renderers_from_flags();  //todo
     fDisplayParams.fGrContextOptions.fDisableDriverCorrectnessWorkarounds = false;
     fDisplayParams.fGrContextOptions.fReduceOpsTaskSplitting = GrContextOptions::Enable::kYes;
     fDisplayParams.fGrContextOptions.fAllowMSAAOnNewIntel = false;
@@ -74,7 +74,7 @@ void initD3D() {
     wgpu::RequestAdapterOptions adapterOptions;
     adapterOptions.backendType = wgpu::BackendType::D3D12;
     adapterOptions.compatibilityMode = false;
-    adapterOptions.nextInChain = &togglesDesc;
+    //adapterOptions.nextInChain = &togglesDesc;
     std::vector<dawn::native::Adapter> adapters = fInstance->EnumerateAdapters(&adapterOptions);
     if (adapters.empty()) {
         return;
