@@ -135,6 +135,9 @@ void initD3D() {
     wgpu::SurfaceDescriptor surfaceDesc;
     surfaceDesc.nextInChain = &surfaceChainedDesc;
     fSurface = wgpu::Instance(fInstance->Get()).CreateSurface(&surfaceDesc);
+
+
+
     wgpu::SurfaceConfiguration surfaceConfig;
     surfaceConfig.device = fDevice;
     surfaceConfig.format = fSurfaceFormat;
@@ -169,7 +172,6 @@ void paint(const HWND hWnd)
 {
     wgpu::SurfaceTexture surfaceTexture;
     fSurface.GetCurrentTexture(&surfaceTexture);
-    SkASSERT(surfaceTexture.texture);
     auto texture = surfaceTexture.texture;
     skgpu::graphite::DawnTextureInfo info(/*sampleCount=*/1,
         skgpu::Mipmapped::kNo,
