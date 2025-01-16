@@ -1,9 +1,12 @@
+
+
 调试模式用不了这三个库：
         allocator_shim
         allocator_base
         allocator_core
 把Skia调试库编译成MT，不用MTd了
 把此工程调试状态运行库也调成MT
+使用CMake-gui构建的项目
 
 目前用不了GPU的能力，得重新搞一下这个项目的代码
 
@@ -84,4 +87,16 @@ skia_enable_skunicode = true
 ```
 ```
 ninja -C out/release
+```
+
+
+这一大套配置可以让exe小1k
+```
+    target_link_options(${PROJECT_NAME} PRIVATE /INCREMENTAL:NO)
+    set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} /DEBUG:NONE")
+    set(CMAKE_EXE_LINKER_FLAGS_RELEASE "${CMAKE_EXE_LINKER_FLAGS_RELEASE} /OPT:REF /OPT:ICF")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /GR- /EHsc")
+    set(CMAKE_INTERPROCEDURAL_OPTIMIZATION TRUE)
+    set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -ffunction-sections -fdata-sections")
+    set(CMAKE_EXE_LINKER_FLAGS_RELEASE "${CMAKE_EXE_LINKER_FLAGS_RELEASE} -Wl,--gc-sections")
 ```

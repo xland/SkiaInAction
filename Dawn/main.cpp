@@ -1,6 +1,3 @@
-#define NO_ALLOCATOR_SHIM
-#define DISABLE_ALLOCATOR_CHECK
-
 #include <windows.h>
 #include <include/core/SkCanvas.h>
 #include <include/core/SkSurface.h>
@@ -72,7 +69,7 @@ void initD3D() {
     togglesDesc.enabledToggleCount = std::size(kToggles) - 1;
     togglesDesc.enabledToggles = kToggles;
     wgpu::RequestAdapterOptions adapterOptions;
-    adapterOptions.backendType = wgpu::BackendType::D3D12;
+    adapterOptions.backendType = wgpu::BackendType::D3D11;
     adapterOptions.compatibilityMode = false;
     //adapterOptions.nextInChain = &togglesDesc;
     std::vector<dawn::native::Adapter> adapters = fInstance->EnumerateAdapters(&adapterOptions);
