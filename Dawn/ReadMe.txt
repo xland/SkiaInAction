@@ -100,3 +100,15 @@ ninja -C out/release
     set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -ffunction-sections -fdata-sections")
     set(CMAKE_EXE_LINKER_FLAGS_RELEASE "${CMAKE_EXE_LINKER_FLAGS_RELEASE} -Wl,--gc-sections")
 ```
+
+upx能压缩到5M
+```
+D:\tools\upx>upx D:\project\SkiaInAction\Dawn\out\build\x64-Release\Release\DrawinWindow.exe
+                       Ultimate Packer for eXecutables
+                          Copyright (C) 1996 - 2024
+UPX 4.2.4       Markus Oberhumer, Laszlo Molnar & John Reiser    May 9th 2024
+
+        File size         Ratio      Format      Name
+   --------------------   ------   -----------   -----------
+  14869504 ->   5229568   35.17%    win64/pe     DrawinWindow.exe                                                                                                                                                                               Packed 1 file.
+```

@@ -138,10 +138,8 @@ void initD3D() {
     wgpu::SurfaceConfiguration surfaceConfig;
     surfaceConfig.device = fDevice;
     surfaceConfig.format = fSurfaceFormat;
-    surfaceConfig.usage = wgpu::TextureUsage::RenderAttachment |
-        wgpu::TextureUsage::TextureBinding |
-        wgpu::TextureUsage::CopySrc |
-        wgpu::TextureUsage::CopyDst;
+    surfaceConfig.usage = wgpu::TextureUsage::RenderAttachment | wgpu::TextureUsage::TextureBinding | 
+        wgpu::TextureUsage::CopySrc | wgpu::TextureUsage::CopyDst;
     surfaceConfig.width = w;
     surfaceConfig.height = h;
     surfaceConfig.presentMode = fDisplayParams.fDisableVsync ? wgpu::PresentMode::Immediate : wgpu::PresentMode::Fifo;
@@ -235,7 +233,7 @@ void initWindow()
     auto hinstance = GetModuleHandle(NULL);
     WNDCLASSEX wcx{};
     wcx.cbSize = sizeof(WNDCLASSEX);
-    wcx.style = CS_HREDRAW | CS_VREDRAW;
+    wcx.style = CS_HREDRAW | CS_VREDRAW | CS_OWNDC;
     wcx.lpfnWndProc = wndProc;
     wcx.hCursor = LoadCursor(nullptr, IDC_ARROW);
     wcx.lpszClassName = clsName.c_str();
