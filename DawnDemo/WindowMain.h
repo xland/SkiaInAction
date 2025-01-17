@@ -36,10 +36,10 @@ private:
 	static LRESULT CALLBACK wndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam);
 private:
 	int x, y, w, h;
-	wgpu::Device dawnDevice;
 	HWND hwnd;
 	DisplayParams displayParams;
 	wgpu::TextureFormat surfaceFormat{ wgpu::TextureFormat::BGRA8Unorm };
+	wgpu::Device dawnDevice;
 	std::unique_ptr<dawn::native::Instance> dawnInstance;
 	wgpu::Surface dawnSurface;
 	std::unique_ptr<skgpu::graphite::Context> graphiteContext;

@@ -35,7 +35,7 @@ WindowMain::WindowMain()
     initDawnInstance();
     initDawnDevice();
     initDawnSurface();
-    configSurface();
+    //configSurface();
     initGraphite();
 
 
@@ -264,7 +264,6 @@ LRESULT WindowMain::wndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
             win->w = LOWORD(lParam);
             win->h = HIWORD(lParam);
             win->configSurface();
-            RedrawWindow(hWnd, nullptr, nullptr, RDW_INVALIDATE | RDW_UPDATENOW | RDW_ALLCHILDREN);
             //auto surface = win->getSurface();
             //win->paint(surface->getCanvas());
             //win->flush();
