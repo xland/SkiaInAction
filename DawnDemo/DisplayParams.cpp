@@ -21,4 +21,9 @@ DisplayParams::DisplayParams() : fColorType(kN32_SkColorType)
     fGrContextOptions.fSuppressPrints = true;
     fGrContextOptions.fSupportBilerpFromGlyphAtlas = true;
     fCreateProtectedNativeBackend = false;
+
+    //todo
+    //skgpu::graphite::ContextOptionsPriv fPriv;
+    //fPriv.fPathRendererStrategy = skgpu::graphite::PathRendererStrategy::kDefault; //kComputeMSAA8
+    //fPriv.fStoreContextRefInRecorder = true; //需要使同步readPixels工作
 }

@@ -25,7 +25,7 @@ target_sources(${PROJECT_NAME} PRIVATE
 "main.cpp"
 "DisplayParams.h"
 "TestingImageProvider.h"
- "DisplayParams.cpp")
+)
 
 if(WIN32)
     set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} /SUBSYSTEM:WINDOWS")

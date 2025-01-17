@@ -39,6 +39,17 @@ wgpu::Surface fSurface;
 std::unique_ptr<skgpu::graphite::Context> fGraphiteContext;
 std::unique_ptr<skgpu::graphite::Recorder> fGraphiteRecorder;
 
+void configSurface() {
+    wgpu::SurfaceConfiguration surfaceConfig;
+    surfaceConfig.device = fDevice;
+    surfaceConfig.format = fSurfaceFormat;
+    surfaceConfig.usage = wgpu::TextureUsage::RenderAttachment | wgpu::TextureUsage::TextureBinding |
+        wgpu::TextureUsage::CopySrc | wgpu::TextureUsage::CopyDst;
+    surfaceConfig.width = w;
+    surfaceConfig.height = h;
+    surfaceConfig.presentMode = fDisplayParams.fDisableVsync ? wgpu::PresentMode::Immediate : wgpu::PresentMode::Fifo;
+    fSurface.Configure(&surfaceConfig);
+}
 void initDisplayParams() {
     fDisplayParams.fMSAASampleCount = 1;
     static std::unique_ptr<SkExecutor> gGpuExecutor = SkExecutor::MakeFIFOThreadPool(2);
@@ -135,18 +146,7 @@ void initD3D() {
     wgpu::SurfaceDescriptor surfaceDesc;
     surfaceDesc.nextInChain = &surfaceChainedDesc;
     fSurface = wgpu::Instance(fInstance->Get()).CreateSurface(&surfaceDesc);
-
-
-
-    wgpu::SurfaceConfiguration surfaceConfig;
-    surfaceConfig.device = fDevice;
-    surfaceConfig.format = fSurfaceFormat;
-    surfaceConfig.usage = wgpu::TextureUsage::RenderAttachment | wgpu::TextureUsage::TextureBinding | 
-        wgpu::TextureUsage::CopySrc | wgpu::TextureUsage::CopyDst;
-    surfaceConfig.width = w;
-    surfaceConfig.height = h;
-    surfaceConfig.presentMode = fDisplayParams.fDisableVsync ? wgpu::PresentMode::Immediate : wgpu::PresentMode::Fifo;
-    fSurface.Configure(&surfaceConfig);
+    configSurface();
 }
 void initDAWN() {    
     WGPUInstanceDescriptor desc{};
@@ -164,9 +164,9 @@ void initDAWN() {
         SkASSERT(false);
         return;
     }
-    skgpu::graphite::RecorderOptions options;
-    options.fImageProvider.reset(new TestingImageProvider);
-    fGraphiteRecorder = fGraphiteContext->makeRecorder(options);
+    //skgpu::graphite::RecorderOptions options;
+    //options.fImageProvider.reset(new TestingImageProvider);
+    fGraphiteRecorder = fGraphiteContext->makeRecorder();
 }
 void paint(const HWND hWnd)
 {
@@ -210,6 +210,7 @@ LRESULT CALLBACK wndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
     {
         w = LOWORD(lParam);
         h = HIWORD(lParam);
+        configSurface();
         break;
     }
     case WM_PAINT:
