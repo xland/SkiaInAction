@@ -51,7 +51,7 @@
 		clang_win = "C:\Program Files\LLVM"
 		cc = "clang"
 		cxx = "clang++"
-		extra_cflags = [ "/MT", "-O2", "-fno-exceptions", "-fno-rtti" ]
+		extra_cflags = [ "/MT" ]
 		is_official_build = false
 		is_debug = false
 		skia_use_system_expat = false

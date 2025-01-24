@@ -240,8 +240,6 @@ void WindowMain::initDawnInstance()
     WGPUInstanceDescriptor desc{};
     desc.features.timedWaitAnyEnable = true;
     dawnInstance = std::make_unique<dawn::native::Instance>(&desc);
-
-    wgpu::swa
 }
 
 LRESULT WindowMain::wndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
